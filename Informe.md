@@ -38,12 +38,12 @@ El análisis se basó en:
 
 | Elemento clave               | ¿Está presente? | Comentarios |
 |-------------------------------|-----------------|-------------|
-| **README.md**                 | ✅ Sí           | Explica cómo empezar, cómo construir contratos y cómo invocarlos. |
-| **Documentación técnica**     | ⚠️ Parcial      | Instrucciones básicas en README. Faltan guías más profundas y ejemplos avanzados. |
-| **Pruebas unitarias**         | ✅ Sí           | Cada ejemplo tiene tests (`cargo test`). Útiles para medir cobertura. |
-| **Historial de issues**       | ✅ Sí           | Issues abiertos y cerrados. Actividad moderada, sin saturación. |
-| **Licencia**                  | ✅ Sí           | Apache-2.0. Claridad legal. |
-| **Actividad de commits**      | ✅ Sí           | Commits recientes. Proyecto mantenido. |
+| **README.md**                 |  Sí           | Explica cómo empezar, cómo construir contratos y cómo invocarlos. |
+| **Documentación técnica**     |  Parcial      | Instrucciones básicas en README. Faltan guías más profundas y ejemplos avanzados. |
+| **Pruebas unitarias**         |  Sí           | Cada ejemplo tiene tests (`cargo test`). Útiles para medir cobertura. |
+| **Historial de issues**       |  Sí           | Issues abiertos y cerrados. Actividad moderada, sin saturación. |
+| **Licencia**                  |  Sí           | Apache-2.0. Claridad legal. |
+| **Actividad de commits**      |  Sí           | Commits recientes. Proyecto mantenido. |
 
 ---
 
