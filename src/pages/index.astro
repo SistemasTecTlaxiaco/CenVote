@@ -1,36 +1,35 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import WalletConnector from '../components/WalletConnector.astro';
-import PasskeyConnector from '../components/PasskeyConnector.astro';
-
-// Definir las variables que se usarán en el cliente
-const CONTRACT_ID = "GC627W5PYYE5SXWAKC4LB72OYY3JMCP33N7KZ6EILCWAQNHIQDMB3O5W";
+import FreighterConnect from '../components/FreighterConnect.astro';
 ---
 
 <Layout title="CenVote - Sistema de Votación Descentralizada">
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
     <!-- Header/Navigation -->
-    <nav class="bg-white shadow-lg">
+    <nav class="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-2xl font-bold text-primary">CenVote</h1>
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center gap-8">
+            <div class="flex-shrink-0">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">CenVote</h1>
+              </div>
             </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <a href="/users" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-primary">
-                Usuarios
-              </a>
-              <a href="/candidates" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-primary">
-                Candidatos
-              </a>
-              <a href="/surveys" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-primary">
-                Encuestas
-              </a>
+            <div class="hidden md:flex gap-8">
+              <a href="#features" class="text-slate-300 hover:text-white transition">Características</a>
+              <a href="#about" class="text-slate-300 hover:text-white transition">Acerca de</a>
+              <a href="#contact" class="text-slate-300 hover:text-white transition">Contacto</a>
             </div>
           </div>
-          <div class="flex items-center">
-            <WalletConnector />
+          <div class="flex items-center gap-2">
+            <a href="https://freighter.app" target="_blank" class="px-4 py-2 text-sm text-slate-300 hover:text-white transition">
+              Instalar Freighter
+            </a>
           </div>
         </div>
       </div>
@@ -38,131 +37,129 @@ const CONTRACT_ID = "GC627W5PYYE5SXWAKC4LB72OYY3JMCP33N7KZ6EILCWAQNHIQDMB3O5W";
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <h2 class="text-4xl font-extrabold text-gray-900 mb-4">
-          Bienvenido a CenVote
+      <!-- Hero Section -->
+      <div class="text-center mb-16">
+        <h2 class="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          Sistema de Votación <br />
+          <span class="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Descentralizado</span>
         </h2>
-        <p class="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
-          Sistema de votación descentralizado seguro y transparente
+        <p class="text-xl text-slate-300 max-w-2xl mx-auto mb-8">
+          Participa en votaciones seguras y transparentes usando la tecnología blockchain de Stellar
         </p>
-
-        <!-- Passkey + Freighter Authentication Section -->
-        <div class="mt-12 mb-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-8 border-2 border-blue-200">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">🔐 Autenticación Segura</h3>
-          <p class="text-gray-600 mb-8">Autentica usando Passkey (WebAuthn) + Freighter Wallet</p>
-          <PasskeyConnector />
-        </div>
-
-        <div class="mt-10 grid gap-6 md:grid-cols-3">
-          <a href="/users"
-            class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestión de Usuarios</h3>
-            <p class="text-gray-600">Registra y administra usuarios en el sistema</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="#wallet" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg transition">
+            Comenzar Ahora
           </a>
-          <a href="/candidates"
-            class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestión de Candidatos</h3>
-            <p class="text-gray-600">Administra los candidatos para las votaciones</p>
-          </a>
-          <a href="/surveys"
-            class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestión de Encuestas</h3>
-            <p class="text-gray-600">Crea y administra encuestas de votación</p>
+          <a href="https://stellar.org" target="_blank" class="px-8 py-3 border border-slate-500 text-slate-300 hover:text-white font-semibold rounded-lg transition">
+            Aprender más
           </a>
         </div>
       </div>
+
+      <!-- Freighter Connection Section -->
+      <div id="wallet" class="mb-16">
+        <FreighterConnect />
+      </div>
+
+      <!-- Features Section -->
+      <div id="features" class="mt-20">
+        <h3 class="text-3xl font-bold text-white mb-12 text-center">Características principales</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Feature 1 -->
+          <div class="bg-slate-800 rounded-xl p-8 border border-slate-700 hover:border-blue-500 transition">
+            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+            </div>
+            <h4 class="text-lg font-semibold text-white mb-2">Seguro</h4>
+            <p class="text-slate-400">Tus votos están protegidos por criptografía blockchain</p>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="bg-slate-800 rounded-xl p-8 border border-slate-700 hover:border-blue-500 transition">
+            <div class="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 8a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h4 class="text-lg font-semibold text-white mb-2">Transparente</h4>
+            <p class="text-slate-400">Todos los votos son verificables y transparentes</p>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="bg-slate-800 rounded-xl p-8 border border-slate-700 hover:border-blue-500 transition">
+            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <h4 class="text-lg font-semibold text-white mb-2">Rápido</h4>
+            <p class="text-slate-400">Transacciones instantáneas en la red Stellar</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Section -->
+      <div id="about" class="mt-20 bg-slate-800 rounded-xl p-12 border border-slate-700">
+        <h3 class="text-3xl font-bold text-white mb-6">Acerca de CenVote</h3>
+        <p class="text-slate-300 text-lg mb-4">
+          CenVote es una plataforma de votación descentralizada construida sobre la red Stellar. 
+          Utiliza smart contracts de Soroban y la wallet Freighter para garantizar que cada voto 
+          sea seguro, transparente y verificable.
+        </p>
+        <p class="text-slate-300 text-lg">
+          Con tu wallet de Freighter, puedes participar en votaciones de forma segura sin tener que 
+          confiar en intermediarios.
+        </p>
+      </div>
+
+      <!-- Info Box -->
+      <div class="mt-12 bg-blue-900/30 border border-blue-500/30 rounded-xl p-8 text-center">
+        <p class="text-blue-200">
+          <strong>ℹ️ Información importante:</strong><br />
+          Este es un sistema de demostración. Asegúrate de usar la red Testnet en Freighter.
+        </p>
+      </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-700 mt-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div>
+            <h5 class="text-white font-semibold mb-4">Proyecto</h5>
+            <ul class="space-y-2 text-slate-400">
+              <li><a href="#" class="hover:text-white transition">Inicio</a></li>
+              <li><a href="#" class="hover:text-white transition">Características</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 class="text-white font-semibold mb-4">Recursos</h5>
+            <ul class="space-y-2 text-slate-400">
+              <li><a href="https://stellar.org" target="_blank" class="hover:text-white transition">Stellar</a></li>
+              <li><a href="https://freighter.app" target="_blank" class="hover:text-white transition">Freighter</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 class="text-white font-semibold mb-4">Desarrollo</h5>
+            <ul class="space-y-2 text-slate-400">
+              <li><a href="https://developers.stellar.org" target="_blank" class="hover:text-white transition">Docs</a></li>
+              <li><a href="https://soroban.stellar.org" target="_blank" class="hover:text-white transition">Soroban</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 class="text-white font-semibold mb-4">Redes</h5>
+            <ul class="space-y-2 text-slate-400">
+              <li><a href="#" class="hover:text-white transition">GitHub</a></li>
+              <li><a href="#" class="hover:text-white transition">Discord</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="border-t border-slate-700 mt-12 pt-8 text-center text-slate-400">
+          <p>© 2025 CenVote - Sistema de Votación Descentralizada</p>
+        </div>
+      </div>
+    </footer>
   </div>
-
-<script>
-import { freighterService } from '../services/FreighterService';
-
-// El CONTRACT_ID se pasa desde el servidor
-declare const CONTRACT_ID: string;
-
-async function invokeContractFunction(method: string, args: any[] = []) {
-  try {
-    // Verificar instalación de Freighter
-    if (!(window as any).freighter) {
-      alert('Por favor instala Freighter Wallet');
-      window.open('https://www.freighter.app', '_blank');
-      return;
-    }
-
-    // Verificar conexión
-    if (!freighterService.isConnected) {
-      const shouldConnect = confirm("Debes conectar tu wallet primero. ¿Conectar ahora?");
-      if (shouldConnect) {
-        const result = await freighterService.connect();
-        if (!result.success) {
-          alert(result.message);
-          return;
-        }
-      } else {
-        return;
-      }
-    }
-
-    // Verificar disponibilidad de la API
-    const freighter = (window as any).freighterApi;
-    if (!freighter) {
-      alert('No se puede acceder a la API de Freighter. Por favor recarga la página.');
-      return;
-    }
-
-    // Obtener información necesaria
-    const publicKey = freighterService.publicKey;
-    const networkDetails = freighterService.networkDetails;
-    
-    if (!publicKey || !networkDetails) {
-      throw new Error("No se pudo obtener la información de la wallet");
-    }
-
-    console.log('Preparando transacción con:', {
-      network: networkDetails.network,
-      publicKey,
-      contractId: CONTRACT_ID,
-      method,
-      args
-    });
-
-    // Crear la transacción
-    const transactionXDR = await freighter.getTransaction({
-      network: networkDetails.network,
-      source: publicKey,
-      contractId: CONTRACT_ID,
-      method,
-      args
-    });
-
-    console.log('TransactionXDR generado:', transactionXDR);
-
-    // Firmar la transacción
-    const { signed, error } = await freighterService.signTransaction(transactionXDR);
-    if (error) {
-      throw new Error(error);
-    }
-
-    // Enviar la transacción
-    console.log('Enviando transacción firmada...');
-    const txResponse = await freighter.signAndSubmitTransaction(signed);
-    console.log("Transacción completada:", txResponse);
-    return txResponse;
-  } catch (err) {
-    console.error("Error en invokeContractFunction:", err);
-    alert(`Error en la transacción: ${err instanceof Error ? err.message : 'Error desconocido'}`);
-  }
-}
-
-// Inicializar la conexión si ya existe
-document.addEventListener('DOMContentLoaded', async () => {
-  const isAvailable = await freighterService.checkConnection();
-  if (isAvailable && freighterService.isConnected) {
-    const result = await freighterService.connect();
-    if (!result.success) {
-      console.error('Error reconectando con Freighter:', result.message);
-    }
-  }
-});
-</script>
 </Layout>

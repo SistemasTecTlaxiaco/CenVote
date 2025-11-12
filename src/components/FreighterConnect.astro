@@ -1,0 +1,294 @@
+---
+/**
+ * Componente de conexión de Freighter Wallet
+ * Diseño profesional con Tailwind CSS
+ * Basado en patrones oficiales de @stellar/freighter-api
+ */
+---
+
+<div id="freighter-connect-container" class="w-full">
+  <!-- Contenedor principal -->
+  <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 md:px-8">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-white">Freighter Wallet</h2>
+      </div>
+      <p class="text-blue-100 mt-2 text-sm">Conecta tu wallet de Stellar de forma segura</p>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 md:p-8 space-y-6">
+      
+      <!-- Status Section -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-white">Estado de conexión</h3>
+        
+        <div id="status-group" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Freighter Status -->
+          <div class="bg-slate-700 rounded-lg p-4 border border-slate-600">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-slate-300 text-sm font-medium">Freighter Extension</p>
+                <p id="freighter-status" class="text-slate-400 text-xs mt-1">Verificando...</p>
+              </div>
+              <div id="freighter-indicator" class="w-3 h-3 rounded-full bg-yellow-500 animate-pulse"></div>
+            </div>
+          </div>
+
+          <!-- Connection Status -->
+          <div class="bg-slate-700 rounded-lg p-4 border border-slate-600">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-slate-300 text-sm font-medium">Wallet Conectada</p>
+                <p id="connection-status" class="text-slate-400 text-xs mt-1">Desconectada</p>
+              </div>
+              <div id="connection-indicator" class="w-3 h-3 rounded-full bg-red-500"></div>
+            </div>
+          </div>
+
+          <!-- Network Status -->
+          <div class="bg-slate-700 rounded-lg p-4 border border-slate-600">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-slate-300 text-sm font-medium">Network</p>
+                <p id="network-status" class="text-slate-400 text-xs mt-1">Sin conectar</p>
+              </div>
+              <div id="network-indicator" class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wallet Info Section -->
+      <div id="wallet-info-section" class="hidden space-y-3 bg-slate-700 rounded-lg p-4 border border-slate-600">
+        <div>
+          <p class="text-slate-400 text-xs uppercase tracking-wide">Dirección Pública</p>
+          <div class="flex items-center gap-2 mt-2">
+            <code id="wallet-address" class="text-green-400 text-sm font-mono bg-slate-800 px-3 py-2 rounded flex-1 truncate">
+              -
+            </code>
+            <button id="copy-address-btn" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition">
+              Copiar
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-slate-400 text-xs uppercase tracking-wide">Red</p>
+          <p id="wallet-network" class="text-slate-200 text-sm font-mono bg-slate-800 px-3 py-2 rounded mt-2">
+            -
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-4">
+        <button
+          id="connect-btn"
+          class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.658 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+          </svg>
+          <span id="connect-btn-text">Conectar Wallet</span>
+        </button>
+
+        <button
+          id="disconnect-btn"
+          class="hidden flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+        >
+          Desconectar
+        </button>
+
+        <button
+          id="refresh-btn"
+          class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition duration-200 flex items-center justify-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Actualizar
+        </button>
+      </div>
+
+      <!-- Message Section -->
+      <div id="message-section" class="hidden">
+        <div id="message-box" class="p-4 rounded-lg text-sm font-medium"></div>
+      </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="bg-slate-700 px-6 py-4 border-t border-slate-600">
+      <p class="text-slate-400 text-xs">
+        💡 <strong>Consejo:</strong> Asegúrate de tener Freighter instalado y configurado en Testnet
+      </p>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ userPublicKey: 'GBBP2RUEDFJQCUXFBODTTSH3RG7JGSVCSS5JZWZ7RKYDYCQXDEATA6IV' }}>
+import FreighterService from '../services/FreighterService';
+
+class FreighterConnector {
+  constructor() {
+    this.service = FreighterService;
+    this.userPublicKey = userPublicKey;
+    this.init();
+  }
+
+  async init() {
+    this.attachEventListeners();
+    await this.checkFreighterStatus();
+  }
+
+  attachEventListeners() {
+    document.getElementById('connect-btn')?.addEventListener('click', () => this.handleConnect());
+    document.getElementById('disconnect-btn')?.addEventListener('click', () => this.handleDisconnect());
+    document.getElementById('refresh-btn')?.addEventListener('click', () => this.handleRefresh());
+    document.getElementById('copy-address-btn')?.addEventListener('click', () => this.copyAddress());
+  }
+
+  async checkFreighterStatus() {
+    try {
+      const result = await this.service.checkInstallation();
+      
+      const indicator = document.getElementById('freighter-indicator');
+      const status = document.getElementById('freighter-status');
+      
+      if (result.success && result.data) {
+        indicator.classList.remove('bg-red-500', 'animate-pulse');
+        indicator.classList.add('bg-green-500');
+        status.textContent = '✓ Instalado';
+      } else {
+        indicator.classList.add('bg-red-500');
+        status.textContent = '✗ No instalado';
+        this.showMessage('Freighter no está instalado. Por favor, instálalo desde freighter.app', 'error');
+      }
+    } catch (error) {
+      console.error('Error verificando Freighter:', error);
+    }
+  }
+
+  async handleConnect() {
+    const btn = document.getElementById('connect-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg><span id="connect-btn-text">Conectando...</span>';
+
+    try {
+      const result = await this.service.connect();
+      
+      if (result.success && result.data) {
+        this.updateUI(result.data);
+        this.showMessage('✓ Wallet conectada exitosamente', 'success');
+      } else {
+        this.showMessage(`✗ Error: ${result.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error conectando:', error);
+      this.showMessage('Error al conectar con la wallet', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.658 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg><span id="connect-btn-text">Conectar Wallet</span>';
+    }
+  }
+
+  handleDisconnect() {
+    this.service.disconnect();
+    this.resetUI();
+    this.showMessage('Wallet desconectada', 'info');
+  }
+
+  async handleRefresh() {
+    await this.checkFreighterStatus();
+  }
+
+  copyAddress() {
+    const address = this.service.getWalletInfo()?.address;
+    if (address) {
+      navigator.clipboard.writeText(address);
+      this.showMessage('✓ Dirección copiada', 'success');
+    }
+  }
+
+  updateUI(walletInfo) {
+    // Update indicators
+    const connectionIndicator = document.getElementById('connection-indicator');
+    connectionIndicator.classList.remove('bg-red-500');
+    connectionIndicator.classList.add('bg-green-500');
+
+    const networkIndicator = document.getElementById('network-indicator');
+    networkIndicator.classList.remove('bg-yellow-500', 'animate-pulse');
+    networkIndicator.classList.add('bg-green-500');
+
+    // Update text
+    document.getElementById('connection-status').textContent = '✓ Conectada';
+    document.getElementById('network-status').textContent = walletInfo.network;
+    
+    // Show wallet info
+    const walletInfoSection = document.getElementById('wallet-info-section');
+    walletInfoSection.classList.remove('hidden');
+    
+    document.getElementById('wallet-address').textContent = walletInfo.address;
+    document.getElementById('wallet-network').textContent = walletInfo.network;
+
+    // Update buttons
+    document.getElementById('connect-btn').classList.add('hidden');
+    document.getElementById('disconnect-btn').classList.remove('hidden');
+  }
+
+  resetUI() {
+    const connectionIndicator = document.getElementById('connection-indicator');
+    connectionIndicator.classList.remove('bg-green-500');
+    connectionIndicator.classList.add('bg-red-500');
+
+    const networkIndicator = document.getElementById('network-indicator');
+    networkIndicator.classList.remove('bg-green-500');
+    networkIndicator.classList.add('bg-yellow-500', 'animate-pulse');
+
+    document.getElementById('connection-status').textContent = 'Desconectada';
+    document.getElementById('network-status').textContent = 'Sin conectar';
+    document.getElementById('wallet-info-section').classList.add('hidden');
+
+    document.getElementById('connect-btn').classList.remove('hidden');
+    document.getElementById('disconnect-btn').classList.add('hidden');
+  }
+
+  showMessage(message, type = 'info') {
+    const messageSection = document.getElementById('message-section');
+    const messageBox = document.getElementById('message-box');
+
+    messageBox.textContent = message;
+    messageBox.classList.remove('bg-blue-900', 'text-blue-200', 'bg-green-900', 'text-green-200', 'bg-red-900', 'text-red-200');
+
+    if (type === 'success') {
+      messageBox.classList.add('bg-green-900', 'text-green-200');
+    } else if (type === 'error') {
+      messageBox.classList.add('bg-red-900', 'text-red-200');
+    } else {
+      messageBox.classList.add('bg-blue-900', 'text-blue-200');
+    }
+
+    messageSection.classList.remove('hidden');
+
+    setTimeout(() => {
+      messageSection.classList.add('hidden');
+    }, 4000);
+  }
+}
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    new FreighterConnector();
+  });
+} else {
+  new FreighterConnector();
+}
+</script>
