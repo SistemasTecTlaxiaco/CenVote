@@ -1,65 +1,79 @@
-# 📡 Plan de Comunicación del Equipo
+# 📡 Plan de Comunicación del Equipo — CenVote
 
 ## 1️⃣ Introducción
-Este documento establece las herramientas, normas y procesos de comunicación del equipo para asegurar coordinación eficiente, seguimiento del proyecto y una interacción clara con el profesor como “cliente” del proyecto.
+Este documento establece las herramientas, normas y procesos de comunicación del equipo **CenVote** para asegurar coordinación eficiente, seguimiento del proyecto y una interacción clara y profesional con el profesor como “cliente” del proyecto.
 
 ---
 
 ## 2️⃣ Formato del Informe Semanal de Progreso
 
 Cada semana se entregará un reporte con la siguiente estructura:
-# Informe Semanal de Progreso
+
+# 📆 Informe Semanal de Progreso — CenVote
 
 ## Datos Generales del Proyecto
-- **Equipo:** Nombre del equipo
-- **Integrantes:** Nombre completo de cada miembro
+- **Equipo:** CenVote Dev Team
+- **Integrantes y Responsabilidades:**
+  - *Integrante 1:* Desarrollo Frontend
+  - *Integrante 2:* Desarrollo Backend
+  - *Integrante 3:* Diseño UI/UX y Documentación
+  - *Integrante 4:* Base de Datos / QA y Pruebas
 - **Semana / Fecha:** Semana correspondiente o fecha del reporte
 - **Estado del Proyecto:** 🟢 / 🟡 / 🔴 (Código de Semáforos)
 
 ---
 
 ## 1. Actividades Completadas
-Describir de forma clara lo logrado esta semana.
-
-- Tarea 1 finalizada
-- Tarea 2 finalizada
-- etc.
+- Registro e inicio de sesión en Freighter
+- Integración inicial de Soroban con React/Astro
+- Configuración del repositorio en GitHub con ramas estructuradas
+- Diseño básico de interfaz de usuario para votación
 
 ---
 
 ## 2. Actividades en Desarrollo
-Tareas que continúan en proceso.
-
-- Actividad 1 en curso
-- Actividad 2 en curso
+- Implementación del registro de usuarios en contrato inteligente
+- Gestión de roles (administrador / votante)
+- UI para creación y publicación de elecciones
+- Conexión estable con la red de pruebas de Stellar / Soroban
 
 ---
 
 ## 3. Actividades Pendientes
-Actividades que aún no inician o están retrasadas.
-
-- Actividad pendiente 1
-- Actividad pendiente 2
+- Validación de identidad y elegibilidad del votante
+- Seguridad de datos y auditoría del voto
+- Diseño responsivo final
+- Despliegue en servidor/hosting
 
 ---
 
 ## 4. Obstáculos o Problemas Presentados
-Situaciones que afectaron el progreso del proyecto.
-
-- Descripción del problema y responsable de seguimiento
+- Configuración del entorno Soroban en algunos equipos
+- Errores de conexión Freighter–dApp
+- Pendiente seleccionar red definitiva de pruebas
 
 ---
 
 ## 5. Próximas Acciones
-Tareas previstas para la siguiente semana.
-
-- Acción 1
-- Acción 2
+- Probar emisión de voto y conteo en contrato inteligente
+- Implementación del historial de votaciones
+- Pruebas de accesibilidad y rendimiento
+- Documentación de entregables
 
 ---
 
 ## 6. Observaciones Generales
-Notas adicionales como apoyo requerido o avisos importantes.
+- Requiere capacitación rápida en herramientas blockchain (Soroban/Stellar)
+
+---
+
+## 7️⃣ Responsabilidad por Actividades
+| Integrante | Actividades asignadas | Estado | Notas |
+|-----------|----------------------|--------|------|
+| Frontend Dev | Formularios, UI, conexión Freighter | 🟡 | Requiere apoyo en eventos blockchain |
+| Backend / Smart Contracts | Lógica de votación y despliegue Soroban | 🟢 | Avance estable |
+| UI/UX–Documentación | Mockups finales, manual de uso | 🟢 | Diseño base aprobado |
+| BD / QA | Pruebas automáticas, auditoría | 🟡 | Se une al desarrollo blockchain |
 
 ---
 
@@ -67,10 +81,10 @@ Notas adicionales como apoyo requerido o avisos importantes.
 
 | Sección | Estado | Justificación breve |
 |--------|--------|-------------------|
-| Completadas | 🟢 / 🟡 / 🔴 | Motivo del estado |
-| En desarrollo | 🟢 / 🟡 / 🔴 | Motivo del estado |
-| Pendientes | 🟢 / 🟡 / 🔴 | Motivo del estado |
-| Riesgos | 🟢 / 🟡 / 🔴 | Motivo del estado |
+| Completadas | 🟢 | Avance conforme al plan |
+| En desarrollo | 🟡 | Desafíos técnicos moderados |
+| Pendientes | 🟡 | Dependen de entregables previos |
+| Riesgos | 🔴 | Complejidad en red blockchain |
 
 ---
 
@@ -82,7 +96,6 @@ Notas adicionales como apoyo requerido o avisos importantes.
 | 🟡 Amarillo | Precaución | Obstáculos moderados que podrían causar retraso |
 | 🔴 Rojo | En riesgo | Problemas que impiden avanzar correctamente |
 
-El equipo documentará el informe semanal en el repositorio GitHub dentro del archivo `WEEKLY_REPORT.md` o equivalente.
 
 ---
 
@@ -90,26 +103,28 @@ El equipo documentará el informe semanal en el repositorio GitHub dentro del ar
 
 | Herramienta | Propósito | Justificación |
 |------------|-----------|---------------|
-| GitHub | Repositorio, control de versiones y seguimiento del proyecto | Herramienta estándar profesional |
-| WhatsApp / Discord / Slack | Mensajería rápida para coordinación inmediata | Comunicación instantánea entre integrantes |
-| Google Meet / Zoom | Reuniones semanales y toma de decisiones colaborativas | Facilita discusión verbal clara y efectiva |
+| GitHub | Repositorio y seguimiento del proyecto | Control de versiones y transparencia |
+| WhatsApp | Coordinación rápida del equipo | Comunicación inmediata |
+| Google Meet | Reuniones y presentación al cliente | Mejora toma de decisiones |
+| Google Drive | Gestión de documentos y reportes | Facilita colaboración en tiempo real |
 
 ---
 
 ## 4️⃣ Normas de Comunicación Interna
 
-1. Toda modificación al código deberá registrarse con *commits descriptivos*.
-2. Las decisiones importantes se documentarán en GitHub.
+1. Cada cambio en el repositorio debe tener **commit descriptivo y responsable visible**.
+2. Todas las decisiones importantes se documentan en GitHub.
 3. Los mensajes deben responderse en un máximo de **24 horas**.
-4. Habrá **una reunión semanal** en horario acordado.
-5. Si existe un impedimento para continuar una tarea, se reportará inmediatamente.
-6. La comunicación será siempre **profesional y respetuosa**.
+4. Se realizará **una reunión semanal oficial**.
+5. Reportar impedimentos **inmediatamente**.
+6. Trato **profesional y respetuoso** en todo momento.
 
 ---
 
 ## 5️⃣ Conclusión
-Este plan de comunicación garantiza claridad, transparencia y una colaboración efectiva dentro del equipo, simulando un entorno de trabajo profesional y asegurando el logro de los objetivos del proyecto.
+Este plan de comunicación fomenta transparencia, organización y coordinación efectiva, simulando un entorno laboral real y asegurando el éxito del proyecto **CenVote**.
 
 ---
 
-📍 **Documento Oficial del Proyecto — Constelación de Comunicación**
+📍 **Documento Oficial de Comunicación del Proyecto CenVote**
+
