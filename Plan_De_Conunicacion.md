@@ -14,10 +14,10 @@ Cada semana se entregará un reporte con la siguiente estructura:
 ## Datos Generales del Proyecto
 - **Equipo:** CenVote Dev Team
 - **Integrantes y Responsabilidades:**
-  - *Integrante 1:* Desarrollo Frontend
-  - *Integrante 2:* Desarrollo Backend
-  - *Integrante 3:* Diseño UI/UX y Documentación
-  - *Integrante 4:* Base de Datos / QA y Pruebas
+  - *Diego Cruz Cruz:* Desarrollo Frontend
+  - *Marco Uriel Rosas Garcia:* Desarrollo Backend
+  - *Irvin Jimenez Sanchez:* Diseño UI/UX y Documentación
+  - *Erik Israel Cuevas Hernandez:* Base de Datos / QA y Pruebas
 - **Semana / Fecha:** Semana correspondiente o fecha del reporte
 - **Estado del Proyecto:** 🟢 / 🟡 / 🔴 (Código de Semáforos)
 
