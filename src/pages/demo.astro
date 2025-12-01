@@ -1,0 +1,268 @@
+---
+// Demo page showing Passkey + Freighter integration
+import Layout from '../layouts/Layout.astro';
+import PasskeyConnector from '../components/PasskeyConnector.astro';
+import WalletConnector from '../components/WalletConnector.astro';
+---
+
+<Layout title="CenVote - Passkey & Freighter Demo">
+  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950">
+    <!-- Header -->
+    <nav class="border-b border-white/10 backdrop-blur-xl bg-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">🔐 CenVote Demo</h1>
+          </div>
+          <div class="flex items-center gap-4">
+            <a href="/" class="text-gray-300 hover:text-emerald-400 font-medium transition">← Inicio</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Demo Section -->
+    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Left: Passkey Authentication -->
+        <div class="space-y-6">
+          <div class="backdrop-blur-xl bg-white/5 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 px-6 py-4 border-b border-white/10">
+              <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                📱 Autenticación con Passkey
+              </h2>
+            </div>
+            <div class="p-6">
+              <PasskeyConnector title="WebAuthn Passkey" showDebug={true} />
+            </div>
+            <div class="px-6 py-4 border-t border-white/10 text-sm text-gray-300">
+              <p><strong class="text-emerald-300">¿Qué es Passkey?</strong></p>
+              <ul class="mt-2 space-y-1 list-disc list-inside">
+                <li>Biometría (huella, cara) o PIN del dispositivo</li>
+                <li>Sin contraseñas necesarias</li>
+                <li>Compatible con contratos Soroban (__check_auth)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Freighter Wallet -->
+        <div class="space-y-6">
+          <div class="backdrop-blur-xl bg-white/5 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-500/20 to-yellow-500/20 px-6 py-4 border-b border-white/10">
+              <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                🪐 Cartera Freighter
+              </h2>
+            </div>
+            <div class="p-6">
+              <WalletConnector />
+            </div>
+            <div class="px-6 py-4 border-t border-white/10 text-sm text-gray-300">
+              <p><strong class="text-orange-300">Sobre Freighter</strong></p>
+              <ul class="mt-2 space-y-1 list-disc list-inside">
+                <li>Extensión de navegador para cartera Stellar</li>
+                <li>Firma transacciones XLM</li>
+                <li>Compatible con contratos Soroban</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How It Works Section -->
+      <div class="mt-12 backdrop-blur-xl bg-white/5 border border-white/10 rounded-lg shadow-2xl p-8">
+        <h2 class="text-3xl font-bold text-white mb-6">🔄 ¿Cómo funciona juntos?</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Step 1 -->
+          <div class="relative">
+            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-gradient-to-br from-emerald-500 to-cyan-500 text-white font-bold text-lg">
+              1
+            </div>
+            <h3 class="mt-4 text-lg font-medium text-white">Usuario registra Passkey</h3>
+            <p class="mt-2 text-sm text-gray-300">
+              El usuario crea un passkey usando biometría o PIN. La clave pública se almacena en tu contrato Soroban.
+            </p>
+          </div>
+
+          <!-- Arrow -->
+          <div class="hidden md:flex items-center justify-center">
+            <div class="text-3xl text-emerald-400">→</div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="relative">
+            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-gradient-to-br from-cyan-500 to-blue-500 text-white font-bold text-lg">
+              2
+            </div>
+            <h3 class="mt-4 text-lg font-medium text-white">Conecta cartera</h3>
+            <p class="mt-2 text-sm text-gray-300">
+              El usuario aprueba la conexión de Freighter. La cartera puede firmar transacciones en Stellar.
+            </p>
+          </div>
+
+          <!-- Arrow -->
+          <div class="hidden md:flex items-center justify-center">
+            <div class="text-3xl text-cyan-400">→</div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="relative">
+            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold text-lg">
+              3
+            </div>
+            <h3 class="mt-4 text-lg font-medium text-white">Firma transacción</h3>
+            <p class="mt-2 text-sm text-gray-300">
+              Passkey autentica localmente. Freighter firma la transacción del contrato con la clave de la cartera.
+            </p>
+          </div>
+
+          <!-- Arrow -->
+          <div class="hidden md:flex items-center justify-center">
+            <div class="text-3xl text-blue-400">→</div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="relative">
+            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold text-lg">
+              4
+            </div>
+            <h3 class="mt-4 text-lg font-medium text-white">Verificación del contrato</h3>
+            <p class="mt-2 text-sm text-gray-300">
+              __check_auth de Soroban verifica ambas firmas. ¡La transacción es aprobada!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Comparison -->
+      <div class="mt-12 backdrop-blur-xl bg-white/5 border border-white/10 rounded-lg shadow-2xl p-8">
+        <h2 class="text-3xl font-bold text-white mb-6">📊 Comparación de características</h2>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b-2 border-white/20">
+              <tr>
+                <th class="px-6 py-3 text-left font-semibold text-white">Característica</th>
+                <th class="px-6 py-3 text-left font-semibold text-white">Passkey</th>
+                <th class="px-6 py-3 text-left font-semibold text-white">Freighter</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10">
+              <tr class="hover:bg-white/5 transition">
+                <td class="px-6 py-3 text-gray-200 font-medium">Autenticación</td>
+                <td class="px-6 py-3 text-emerald-400">✅ Biometría local</td>
+                <td class="px-6 py-3 text-emerald-400">✅ Basada en clave</td>
+              </tr>
+              <tr class="bg-white/5 hover:bg-white/10 transition">
+                <td class="px-6 py-3 text-gray-200 font-medium">Firma transacciones</td>
+                <td class="px-6 py-3 text-emerald-400">✅ Via __check_auth</td>
+                <td class="px-6 py-3 text-emerald-400">✅ XDR completo</td>
+              </tr>
+              <tr class="hover:bg-white/5 transition">
+                <td class="px-6 py-3 text-gray-200 font-medium">Sin contraseñas</td>
+                <td class="px-6 py-3 text-emerald-400">✅ Sí</td>
+                <td class="px-6 py-3 text-emerald-400">✅ Sí</td>
+              </tr>
+              <tr class="bg-white/5 hover:bg-white/10 transition">
+                <td class="px-6 py-3 text-gray-200 font-medium">Entre dispositivos</td>
+                <td class="px-6 py-3 text-yellow-400">⚠️ Limitado</td>
+                <td class="px-6 py-3 text-emerald-400">✅ Sí</td>
+              </tr>
+              <tr class="hover:bg-white/5 transition">
+                <td class="px-6 py-3 text-gray-200 font-medium">Soporte de red</td>
+                <td class="px-6 py-3 text-cyan-400">Basado en contrato</td>
+                <td class="px-6 py-3 text-emerald-400">✅ Testnet/mainnet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Code Examples -->
+      <div class="mt-12 backdrop-blur-xl bg-slate-950/50 border border-white/10 rounded-lg shadow-2xl p-8 text-gray-100">
+        <h2 class="text-3xl font-bold text-white mb-6">💻 Ejemplos de código</h2>
+        
+        <div class="space-y-6">
+          <!-- Example 1 -->
+          <div>
+            <h3 class="text-lg font-semibold mb-2 text-emerald-400">1. Registrar Passkey</h3>
+            <pre class="bg-gray-900 p-4 rounded overflow-x-auto text-sm border border-white/10"><code>{`import { registerPasskey } from '../services/PasskeyService';
+
+const result = await registerPasskey({
+  id: 'user-123',
+  name: 'Juan Perez',
+  displayName: 'Juan'
+});
+
+console.log('ID de credencial:', result.rawId);`}</code></pre>
+          </div>
+
+          <!-- Example 2 -->
+          <div>
+            <h3 class="text-lg font-semibold mb-2 text-cyan-400">2. Conectar Freighter</h3>
+            <pre class="bg-gray-900 p-4 rounded overflow-x-auto text-sm border border-white/10"><code>{`import { freighterService } from '../services/FreighterService';
+
+const result = await freighterService.connect();
+if (result.success) {
+  console.log('Clave pública:', freighterService.publicKey);
+  console.log('Red:', freighterService.networkDetails?.network);
+}`}</code></pre>
+          </div>
+
+          <!-- Example 3 -->
+          <div>
+            <h3 class="text-lg font-semibold mb-2 text-orange-400">3. Firmar una transacción</h3>
+            <pre class="bg-gray-900 p-4 rounded overflow-x-auto text-sm border border-white/10"><code>{`// Después de autenticar con passkey y conectar Freighter
+const { signed, error } = await freighterService.signTransaction(txXDR);
+
+if (!error) {
+  // Envía la transacción firmada a Stellar
+  const result = await submitTransaction(signed);
+  console.log('Hash de transacción:', result.id);
+}`}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Getting Started -->
+      <div class="mt-12 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/50 rounded-lg shadow-2xl p-8 text-white">
+        <h2 class="text-3xl font-bold mb-4">🚀 Primeros pasos</h2>
+        <ol class="space-y-3 text-lg">
+          <li>
+            <strong>1. Registra un Passkey</strong> - Usa PasskeyConnector para crear tu clave biométrica
+          </li>
+          <li>
+            <strong>2. Conecta Freighter</strong> - Usa WalletConnector para autorizar tu cartera
+          </li>
+          <li>
+            <strong>3. Lee la guía</strong> - Consulta <code class="bg-white bg-opacity-20 px-2 py-1 rounded">PASSKEY_INTEGRATION.md</code> para instrucciones detalladas
+          </li>
+          <li>
+            <strong>4. Despliega contrato</strong> - Implementa tu contrato Soroban con soporte __check_auth
+          </li>
+          <li>
+            <strong>5. Integra votación</strong> - Usa ambos servicios juntos en tu flujo de votación
+          </li>
+        </ol>
+      </div>
+
+      <!-- Support -->
+      <div class="mt-12 text-center text-gray-300">
+        <p class="text-sm">
+          ¿Necesitas ayuda? Consulta la documentación en <code class="bg-white/10 px-2 py-1 rounded">PASSKEY_INTEGRATION.md</code>
+        </p>
+        <p class="text-xs mt-4 text-gray-400">
+          Basado en implementación de referencia <a href="https://github.com/josealfredo79/passkeySoroban" class="text-emerald-400 hover:underline">passkeySoroban</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :global(body) {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+  </style>
+</Layout>

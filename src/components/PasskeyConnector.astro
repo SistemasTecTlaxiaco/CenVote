@@ -1,0 +1,563 @@
+---
+// PasskeyConnector.astro - WebAuthn (Passkey) UI component for Soroban integration
+
+interface Props {
+  title?: string;
+  showDebug?: boolean;
+}
+
+const { title = 'Autenticación Passkey', showDebug = false } = Astro.props as Props;
+---
+
+<div id="passkey-connector" class="passkey-container">
+  <div class="passkey-card">
+    <div class="flex items-center justify-center gap-3 mb-6">
+      <span class="text-3xl">🔐</span>
+      <h2 class="text-2xl font-bold text-white">{title}</h2>
+    </div>
+    
+    <div class="passkey-actions grid gap-3">
+      <div class="input-group mb-2">
+        <label for="username-input" class="block text-sm font-medium text-gray-300 mb-1">Nombre de Usuario</label>
+        <input 
+          type="text" 
+          id="username-input" 
+          class="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white focus:outline-none focus:border-purple-500"
+          placeholder="Ej. usuario123"
+        />
+      </div>
+
+      <button id="register-btn" class="btn-primary w-full">
+        📱 Registrar Passkey
+      </button>
+      <button id="authenticate-btn" class="btn-secondary w-full">
+        ✅ Autenticar
+      </button>
+      
+      <div id="credentials-list" class="mt-4 hidden">
+        <h3 class="text-sm font-bold text-gray-300 mb-2">Mis Passkeys</h3>
+        <ul id="passkeys-ul" class="space-y-2 text-sm">
+          <!-- Lista de passkeys se insertará aquí -->
+        </ul>
+      </div>
+
+      <button id="clear-btn" class="btn-danger w-full mt-2">
+        🗑️ Limpiar Sesión Local
+      </button>
+    </div>
+
+    <div id="status" class="status-message mt-4 text-sm rounded-lg p-3 min-h-10"></div>
+
+    {showDebug && (
+      <div class="debug-section mt-6 bg-white/5 border border-white/10 rounded-lg p-4">
+        <h3 class="text-sm font-bold text-gray-300 mb-2">Debug Info</h3>
+        <pre id="debug-output" class="text-xs bg-black/30 p-3 rounded overflow-y-auto max-h-40 text-gray-400"></pre>
+      </div>
+    )}
+  </div>
+</div>
+
+<script type="module">
+  // Cargar el API base desde el frontend
+  const API_BASE = (import.meta.env.PUBLIC_API_URL || 'http://localhost:3000') + '/api';
+
+  // Funciones auxiliares para codificación
+  function toBase64Url(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let str = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      str += String.fromCharCode(bytes[i]);
+    }
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function fromBase64Url(base64url) {
+    const padding = '='.repeat((4 - (base64url.length % 4)) % 4);
+    const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/') + padding;
+    const str = atob(base64);
+    const bytes = new Uint8Array(str.length);
+    for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
+    return bytes;
+  }
+
+  // Función para registrar passkey
+  async function registerPasskey(opts) {
+    if (!window.PublicKeyCredential) {
+      throw new Error('WebAuthn no es soportado en este navegador');
+    }
+
+    try {
+      // PASO 1: Obtener opciones del backend
+      appendDebug('[PASO 1] Solicitando challenge al servidor...');
+      console.log('[PasskeyConnector] PASO 1: Obteniendo opciones de registro');
+      
+      const t1 = performance.now();
+      const optionsResponse = await fetch(`${API_BASE}/passkey/register/options`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: opts.name,
+          displayName: opts.displayName || opts.name
+        })
+      });
+
+      if (!optionsResponse.ok) {
+        throw new Error('Error obteniendo opciones de registro');
+      }
+
+      const { challenge, sessionId, userId } = await optionsResponse.json();
+      const t2 = performance.now();
+      appendDebug(`[PASO 1] ✓ Challenge recibido en ${(t2-t1).toFixed(0)}ms`);
+
+      // PASO 2: Preparar credencial para WebAuthn
+      appendDebug('[PASO 2] Preparando credencial WebAuthn...');
+      const publicKey = {
+        challenge: new Uint8Array(challenge),
+        rp: {
+          name: 'CenVote dApp'
+          // id: eliminado para evitar error "Invalid domain" (usa el dominio actual por defecto)
+        },
+        user: {
+          id: new TextEncoder().encode(opts.id),
+          name: opts.name,
+          displayName: opts.displayName || opts.name
+        },
+        pubKeyCredParams: [
+          { alg: -7, type: 'public-key' },
+          { alg: -257, type: 'public-key' }
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform',
+          userVerification: 'required',
+          residentKey: 'preferred'
+        },
+        timeout: 60000,
+        attestation: 'none'
+      };
+
+      // PASO 3: Mostrar prompt biométrico
+      appendDebug('[PASO 3] Mostrar prompt de autenticación biométrica (tu huella, Face ID, etc)...');
+      appendDebug('⏳ En espera de acción biométrica del usuario...');
+      console.log('[PasskeyConnector] PASO 3: Esperando credencial del usuario');
+      
+      const t3 = performance.now();
+      const cred = await navigator.credentials.create({ publicKey });
+
+      if (!cred) {
+        throw new Error('No se pudo crear la credencial - operación cancelada');
+      }
+
+      const t4 = performance.now();
+      const attResp = cred.response;
+      appendDebug(`[PASO 3] ✓ Credencial creada en ${(t4-t3).toFixed(0)}ms`);
+
+      // PASO 4: Enviar credencial al backend para verificación
+      appendDebug('[PASO 4] Verificando credencial con el servidor...');
+      console.log('[PasskeyConnector] PASO 4: Verificando credencial');
+      
+      const t5 = performance.now();
+      const verifyResponse = await fetch(`${API_BASE}/passkey/register/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          credentialId: toBase64Url(cred.rawId),
+          publicKey: toBase64Url(attResp.attestationObject),
+          username: opts.name,
+          displayName: opts.displayName || opts.name,
+          aaguid: ''
+        })
+      });
+
+      if (!verifyResponse.ok) {
+        const error = await verifyResponse.json();
+        throw new Error(error.error || 'Error verificando credencial');
+      }
+
+      const result = await verifyResponse.json();
+      const t6 = performance.now();
+      appendDebug(`[PASO 4] ✓ Credencial verificada en ${(t6-t5).toFixed(0)}ms`);
+      
+      // PASO 5: Guardar datos en localStorage
+      appendDebug('[PASO 5] Guardando datos de sesión...');
+      if (result.userId) {
+        localStorage.setItem('passkey_user_id', result.userId);
+        localStorage.setItem('passkey_username', result.username);
+        localStorage.setItem('passkey_display_name', result.displayName);
+      }
+      appendDebug(`[PASO 5] ✓ Datos guardados`);
+
+      console.log('[PasskeyConnector] ✓ Registro exitoso');
+
+      return {
+        id: cred.id,
+        rawId: toBase64Url(cred.rawId),
+        clientDataJSON: toBase64Url(attResp.clientDataJSON),
+        attestationObject: toBase64Url(attResp.attestationObject)
+      };
+    } catch (error) {
+      console.error('[PasskeyConnector] Error:', error);
+      throw error;
+    }
+  }
+
+  // Función para autenticar con passkey
+  async function authenticatePasskey() {
+    if (!window.PublicKeyCredential) {
+      throw new Error('WebAuthn no es soportado en este navegador');
+    }
+
+    try {
+      // PASO 1: Obtener challenge del backend
+      appendDebug('[PASO 1] Solicitando challenge de autenticación...');
+      console.log('[PasskeyConnector] PASO 1: Obteniendo opciones de autenticación');
+      
+      const t1 = performance.now();
+      const optionsResponse = await fetch(`${API_BASE}/passkey/authenticate/options`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+
+      if (!optionsResponse.ok) {
+        throw new Error('Error obteniendo challenge de autenticación');
+      }
+
+      const { challenge, sessionId } = await optionsResponse.json();
+      const t2 = performance.now();
+      appendDebug(`[PASO 1] ✓ Challenge recibido en ${(t2-t1).toFixed(0)}ms`);
+
+      // PASO 2: Preparar credencial para WebAuthn
+      appendDebug('[PASO 2] Preparando autenticación...');
+      const publicKey = {
+        challenge: new Uint8Array(challenge),
+        timeout: 60000,
+        userVerification: 'required',
+        allowCredentials: []
+      };
+
+      // PASO 3: Mostrar prompt biométrico
+      appendDebug('[PASO 3] Mostrar prompt biométrico para autenticación...');
+      appendDebug('⏳ En espera de tu huella o Face ID...');
+      console.log('[PasskeyConnector] PASO 3: Esperando autenticación del usuario');
+
+      const t3 = performance.now();
+      const assertion = await navigator.credentials.get({ publicKey });
+
+      if (!assertion) {
+        throw new Error('No se pudo obtener una aserción - operación cancelada');
+      }
+
+      const t4 = performance.now();
+      const authResp = assertion.response;
+      appendDebug(`[PASO 3] ✓ Autenticación realizada en ${(t4-t3).toFixed(0)}ms`);
+
+      // PASO 4: Verificar autenticación en el backend
+      appendDebug('[PASO 4] Verificando autenticación con el servidor...');
+      console.log('[PasskeyConnector] PASO 4: Verificando aserción');
+      
+      const t5 = performance.now();
+      const verifyResponse = await fetch(`${API_BASE}/passkey/authenticate/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          credentialId: toBase64Url(assertion.rawId),
+          username: localStorage.getItem('passkey_username') || ''
+        })
+      });
+
+      if (!verifyResponse.ok) {
+        const error = await verifyResponse.json();
+        throw new Error(error.error || 'Error en autenticación');
+      }
+
+      const result = await verifyResponse.json();
+      const t6 = performance.now();
+      appendDebug(`[PASO 4] ✓ Autenticación verificada en ${(t6-t5).toFixed(0)}ms`);
+      
+      // PASO 5: Guardar token de sesión
+      appendDebug('[PASO 5] Guardando token de sesión...');
+      if (result.authToken) {
+        localStorage.setItem('auth_token', result.authToken);
+        localStorage.setItem('passkey_user_id', result.userId);
+        localStorage.setItem('passkey_username', result.username);
+        localStorage.setItem('passkey_display_name', result.displayName);
+      }
+      appendDebug(`[PASO 5] ✓ Sesión iniciada`);
+
+      console.log('[PasskeyConnector] ✓ Autenticación exitosa');
+
+      return {
+        id: assertion.id,
+        rawId: toBase64Url(assertion.rawId),
+        clientDataJSON: toBase64Url(authResp.clientDataJSON),
+        authenticatorData: toBase64Url(authResp.authenticatorData),
+        signature: toBase64Url(authResp.signature),
+        userHandle: authResp.userHandle ? toBase64Url(authResp.userHandle) : null
+      };
+    } catch (error) {
+      console.error('[PasskeyConnector] Error:', error);
+      throw error;
+    }
+  }
+
+  // Función para verificar disponibilidad
+  async function isPasskeyAvailable() {
+    try {
+      if (!window.PublicKeyCredential) {
+        return false;
+      }
+      
+      const isUserVerifyingPlatformAuthenticatorAvailable =
+        await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable?.();
+      
+      return isUserVerifyingPlatformAuthenticatorAvailable !== false;
+    } catch {
+      return false;
+    }
+  }
+
+  // Función para listar credenciales
+  async function listCredentials(username) {
+    try {
+      const response = await fetch(`${API_BASE}/passkey/list/${username}`);
+      if (!response.ok) return [];
+      return await response.json();
+    } catch (e) {
+      console.error('Error listing credentials:', e);
+      return [];
+    }
+  }
+
+  // Función para eliminar credencial
+  async function deleteCredential(id) {
+    try {
+      const response = await fetch(`${API_BASE}/passkey/${id}`, { method: 'DELETE' });
+      return response.ok;
+    } catch (e) {
+      console.error('Error deleting credential:', e);
+      return false;
+    }
+  }
+
+  // Renderizar lista de passkeys
+  async function renderCredentialsList(username) {
+    const listContainer = document.getElementById('credentials-list');
+    const ul = document.getElementById('passkeys-ul');
+    if (!listContainer || !ul) return;
+
+    if (!username) {
+      listContainer.classList.add('hidden');
+      return;
+    }
+
+    const credentials = await listCredentials(username);
+    
+    if (credentials.length === 0) {
+      listContainer.classList.add('hidden');
+      return;
+    }
+
+    listContainer.classList.remove('hidden');
+    ul.innerHTML = '';
+
+    credentials.forEach(cred => {
+      const li = document.createElement('li');
+      li.className = 'flex items-center justify-between bg-white/5 p-2 rounded border border-white/10';
+      
+      const date = new Date(cred.created_at).toLocaleDateString();
+      li.innerHTML = `
+        <span class="text-xs text-gray-300 font-mono" title="${cred.credentialId}">
+          🔑 ...${cred.credentialId.slice(-8)} <span class="text-gray-500">(${date})</span>
+        </span>
+        <button class="delete-btn text-red-400 hover:text-red-300 p-1" data-id="${cred.id}">
+          🗑️
+        </button>
+      `;
+      ul.appendChild(li);
+    });
+
+    // Agregar listeners para borrar
+    ul.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (confirm('¿Eliminar este passkey?')) {
+          const success = await deleteCredential(id);
+          if (success) {
+            showStatus('✅ Passkey eliminado', 'success');
+            renderCredentialsList(username);
+          } else {
+            showStatus('❌ Error al eliminar', 'error');
+          }
+        }
+      });
+    });
+  }
+
+  // === SETUP DE EVENTOS ===
+  const registerBtn = document.getElementById('register-btn');
+  const authenticateBtn = document.getElementById('authenticate-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const statusDiv = document.getElementById('status');
+  const debugOutput = document.getElementById('debug-output');
+  const usernameInput = document.getElementById('username-input');
+
+  // Cargar usuario guardado
+  if (usernameInput) {
+    const savedUser = localStorage.getItem('passkey_username');
+    if (savedUser) {
+      usernameInput.value = savedUser;
+      renderCredentialsList(savedUser);
+    }
+    
+    usernameInput.addEventListener('change', (e) => {
+      renderCredentialsList(e.target.value);
+    });
+  }
+
+  console.log('[PasskeyConnector] Elementos encontrados:', {
+    registerBtn: !!registerBtn,
+    authenticateBtn: !!authenticateBtn,
+    clearBtn: !!clearBtn,
+    statusDiv: !!statusDiv,
+    usernameInput: !!usernameInput
+  });
+
+  function showStatus(message, type) {
+    if (statusDiv) {
+      statusDiv.textContent = message;
+      statusDiv.className = `status-message mt-4 text-sm rounded-lg p-3 min-h-10 ${
+        type === 'success' ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-300' :
+        type === 'error' ? 'bg-red-500/20 border border-red-500/50 text-red-300' :
+        type === 'warning' ? 'bg-yellow-500/20 border border-yellow-500/50 text-yellow-300' :
+        'bg-blue-500/20 border border-blue-500/50 text-blue-300'
+      }`;
+    }
+    console.log(`[${type.toUpperCase()}] ${message}`);
+  }
+
+  function appendDebug(text) {
+    if (debugOutput) {
+      debugOutput.textContent += text + '\n';
+      debugOutput.parentElement?.scrollTo(0, debugOutput.scrollHeight);
+    }
+  }
+
+  if (registerBtn) {
+    registerBtn.addEventListener('click', async () => {
+      try {
+        const userName = usernameInput?.value?.trim();
+        
+        if (!userName) {
+          showStatus('❌ Ingresa un nombre de usuario primero', 'error');
+          usernameInput?.focus();
+          return;
+        }
+
+        registerBtn.disabled = true;
+        showStatus('⏳ Registrando passkey...', 'info');
+        appendDebug('[REGISTER] Iniciando registro de passkey...');
+
+        const result = await registerPasskey({
+          id: `user-${Date.now()}`,
+          name: userName,
+          displayName: userName
+        });
+
+        appendDebug(`[REGISTER] ✓ Credencial registrada: ${result.id.substring(0, 20)}...`);
+        showStatus(`✅ Passkey registrado para ${userName}. Puedes autenticarte ahora.`, 'success');
+        
+        // Actualizar lista
+        renderCredentialsList(userName);
+
+        window.dispatchEvent(new CustomEvent('passkeyRegistered', {
+          detail: { userId: result.id, userName }
+        }));
+
+      } catch (err) {
+        const error = err instanceof Error ? err.message : String(err);
+        appendDebug(`[ERROR] ${error}`);
+        showStatus(`❌ Error: ${error}`, 'error');
+      } finally {
+        registerBtn.disabled = false;
+      }
+    });
+  }
+
+  if (authenticateBtn) {
+    authenticateBtn.addEventListener('click', async () => {
+      try {
+        authenticateBtn.disabled = true;
+        showStatus('⏳ Autenticando con passkey...', 'info');
+        appendDebug('[AUTH] Iniciando autenticación...');
+
+        const result = await authenticatePasskey();
+
+        appendDebug(`[AUTH] ✓ Autenticación exitosa: ${result.id.substring(0, 20)}...`);
+        showStatus(`✅ ¡Autenticado exitosamente!`, 'success');
+
+        // Mostrar datos del usuario autenticado
+        const userName = localStorage.getItem('passkey_username');
+        if (userName) {
+          if (usernameInput) usernameInput.value = userName;
+          renderCredentialsList(userName);
+          setTimeout(() => {
+            showStatus(`✅ Bienvenido ${userName}!`, 'success');
+          }, 500);
+        }
+
+        window.dispatchEvent(new CustomEvent('passkeyAuthenticated', {
+          detail: {
+            assertionId: result.id,
+            signature: result.signature,
+            clientDataJSON: result.clientDataJSON
+          }
+        }));
+
+      } catch (err) {
+        const error = err instanceof Error ? err.message : String(err);
+        appendDebug(`[ERROR] ${error}`);
+        showStatus(`❌ Error: ${error}`, 'error');
+      } finally {
+        authenticateBtn.disabled = false;
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (confirm('¿Limpiar datos de sesión locales?')) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('passkey_user_id');
+        localStorage.removeItem('passkey_username');
+        localStorage.removeItem('passkey_display_name');
+        if (usernameInput) usernameInput.value = '';
+        renderCredentialsList('');
+        appendDebug('[CLEAR] Sesión limpiada');
+        showStatus('✅ Sesión limpiada correctamente', 'success');
+      }
+    });
+  }
+
+  // Verificar disponibilidad de WebAuthn al cargar
+  (async () => {
+    const available = await isPasskeyAvailable();
+    appendDebug(`[INIT] WebAuthn disponible: ${available}`);
+    if (!available) {
+      showStatus('⚠️ WebAuthn no disponible en este navegador', 'warning');
+      if (registerBtn) registerBtn.disabled = true;
+      if (authenticateBtn) authenticateBtn.disabled = true;
+    }
+    
+    // Mostrar si hay sesión activa
+    const currentUser = localStorage.getItem('passkey_username');
+    if (currentUser) {
+      appendDebug(`[INIT] Usuario activo: ${currentUser}`);
+      showStatus(`✅ Sesión activa: ${currentUser}`, 'success');
+    }
+  })();
+
+  console.log('[PasskeyConnector] Script inicializado');
+</script>
+

@@ -1,0 +1,606 @@
+---
+// SurveyCardGrid.astro - Componente para mostrar encuestas de forma atractiva
+---
+
+<section id="surveys-section" class="py-16 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h2 class="text-5xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+        🗳️ Encuestas Activas
+      </h2>
+      <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+        Participa en las votaciones y haz que tu voz cuente en la blockchain
+      </p>
+    </div>
+
+    <!-- Grid de Encuestas -->
+    <div id="surveysGrid" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <!-- Las encuestas se cargarán dinámicamente aquí -->
+    </div>
+
+    <!-- Estado vacío -->
+    <div id="emptySurveys" class="hidden text-center py-16">
+      <div class="text-6xl mb-4">📊</div>
+      <p class="text-gray-400 text-lg">No hay encuestas activas en este momento</p>
+      <a href="/surveys" class="btn-primary mt-6 inline-block">
+        Crear Nueva Encuesta
+      </a>
+    </div>
+
+    <!-- Modal de Votación -->
+    <div id="votingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeVotingModal()"></div>
+      
+      <!-- Modal Content -->
+      <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="card-glass backdrop-blur-xl bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 border-2 border-white/20 rounded-3xl p-8 shadow-2xl">
+          <!-- Header -->
+          <div class="flex items-start justify-between mb-6">
+            <div>
+              <h3 id="modalSurveyName" class="text-3xl font-black text-white mb-2">Nombre de Encuesta</h3>
+              <p id="modalSurveyDescription" class="text-gray-300">Descripción de la encuesta</p>
+            </div>
+            <button onclick="closeVotingModal()" class="text-gray-400 hover:text-white transition-colors text-3xl leading-none">
+              ×
+            </button>
+          </div>
+
+          <!-- Payment Info -->
+          <div class="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 mb-6">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">💰</span>
+              <div>
+                <p class="text-white font-semibold">Costo del voto: 0.1 XLM</p>
+                <p class="text-gray-300 text-sm">El pago se procesará usando tu wallet de Freighter</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Candidates List -->
+          <div id="modalCandidatesList" class="space-y-3 mb-6">
+            <!-- Los candidatos se cargarán aquí -->
+          </div>
+
+          <!-- Loading State -->
+          <div id="modalLoading" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
+            <p class="text-gray-300 mt-4">Cargando candidatos...</p>
+          </div>
+
+          <!-- Error State -->
+          <div id="modalError" class="hidden text-center py-8">
+            <div class="text-5xl mb-4">❌</div>
+            <p class="text-red-400 text-lg" id="modalErrorMessage">Error al cargar candidatos</p>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-4 mt-8">
+            <button onclick="closeVotingModal()" 
+              class="flex-1 px-6 py-3 rounded-xl font-semibold bg-gray-600 hover:bg-gray-700 text-white transition-all duration-300">
+              Cancelar
+            </button>
+            <button id="confirmVoteBtn" onclick="confirmVote()" disabled
+              class="flex-1 px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+              🗳️ Confirmar Voto
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { freighterService } from '../services/FreighterService';
+  
+  const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000';
+
+  interface Survey {
+    _id: string;
+    name: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    candidates: string[];
+  }
+
+  interface Candidate {
+    _id: string;
+    name: string;
+    party?: string;
+    description?: string;
+    imageUrl?: string;
+  }
+
+  let currentSurveyId: string | null = null;
+  let selectedCandidateId: string | null = null;
+
+  async function loadSurveys() {
+    try {
+      const response = await fetch(`${API_URL}/api/surveys`);
+      const surveys: Survey[] = await response.json();
+      
+      const surveysGrid = document.getElementById('surveysGrid');
+      const emptySurveys = document.getElementById('emptySurveys');
+      
+      if (!surveys || surveys.length === 0) {
+        surveysGrid?.classList.add('hidden');
+        emptySurveys?.classList.remove('hidden');
+        return;
+      }
+
+      surveysGrid?.classList.remove('hidden');
+      emptySurveys?.classList.add('hidden');
+
+      // Filtrar solo encuestas activas
+      const now = new Date();
+      const activeSurveys = surveys.filter(survey => {
+        const startDate = new Date(survey.start_date);
+        const endDate = new Date(survey.end_date);
+        return now >= startDate && now <= endDate;
+      });
+
+      if (activeSurveys.length === 0) {
+        surveysGrid.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <div class="text-5xl mb-4">⏰</div>
+            <p class="text-gray-400 text-lg">No hay encuestas activas en este momento</p>
+            <p class="text-gray-500 text-sm mt-2">Hay ${surveys.length} encuesta(s) programada(s) para el futuro</p>
+          </div>
+        `;
+        return;
+      }
+
+      surveysGrid.innerHTML = activeSurveys.map(survey => {
+        const endDate = new Date(survey.end_date);
+        const timeRemaining = getTimeRemaining(endDate);
+        
+        return `
+          <div class="group relative overflow-hidden rounded-3xl border-2 border-white/20 hover:border-purple-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20">
+            <!-- Background Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 backdrop-blur-xl"></div>
+            
+            <!-- Animated Glow Effect -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-pulse"></div>
+            </div>
+
+            <!-- Content -->
+            <div class="relative p-8">
+              <!-- Header -->
+              <div class="flex items-start justify-between mb-6">
+                <div class="flex-1">
+                  <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
+                    ${survey.name}
+                  </h3>
+                  <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/20 border border-green-400/30 text-green-300 text-sm font-semibold">
+                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    Activa
+                  </span>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <p class="text-gray-300 text-base mb-6 line-clamp-3 leading-relaxed">
+                ${survey.description}
+              </p>
+
+              <!-- Stats -->
+              <div class="space-y-3 mb-6">
+                <div class="flex items-center gap-3 text-sm">
+                  <span class="text-purple-300">👥</span>
+                  <span class="text-gray-400">
+                    <span class="text-white font-semibold">${survey.candidates ? survey.candidates.length : 0}</span> candidatos
+                  </span>
+                </div>
+                <div class="flex items-center gap-3 text-sm">
+                  <span class="text-pink-300">⏱️</span>
+                  <span class="text-gray-400">
+                    Termina en <span class="text-white font-semibold">${timeRemaining}</span>
+                  </span>
+                </div>
+                <div class="flex items-center gap-3 text-sm">
+                  <span class="text-blue-300">💰</span>
+                  <span class="text-gray-400">
+                    Costo: <span class="text-white font-semibold">0.1 XLM</span> por voto
+                  </span>
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <button 
+                 class="vote-now-btn block w-full text-center px-6 py-4 rounded-xl font-bold text-lg
+                        bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600
+                        hover:from-blue-500 hover:via-purple-500 hover:to-pink-500
+                        text-white shadow-lg shadow-purple-500/30
+                        transform transition-all duration-300
+                        hover:shadow-xl hover:shadow-purple-500/50 hover:-translate-y-1
+                        border-2 border-white/10 hover:border-white/30"
+                 data-survey-id="${survey._id}"
+                 data-survey-name="${survey.name}"
+                 data-survey-description="${survey.description}"
+                 data-candidates='${JSON.stringify(survey.candidates || [])}'>
+                🗳️ Votar Ahora
+              </button>
+
+              <!-- Blockchain Badge -->
+              <div class="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
+                <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                <span>Powered by Stellar Blockchain</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    } catch (error) {
+      console.error('Error al cargar encuestas:', error);
+      const surveysGrid = document.getElementById('surveysGrid');
+      if (surveysGrid) {
+        surveysGrid.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <div class="text-5xl mb-4">❌</div>
+            <p class="text-red-400 text-lg">Error al cargar las encuestas</p>
+            <button onclick="location.reload()" class="btn-primary mt-4">
+              Reintentar
+            </button>
+          </div>
+        `;
+      }
+    }
+  }
+
+  function getTimeRemaining(endDate: Date): string {
+    const now = new Date();
+    const diff = endDate.getTime() - now.getTime();
+    
+    if (diff <= 0) return 'Finalizada';
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  }
+
+  // Abrir modal de votación
+  async function openVotingModal(surveyId: string, surveyName: string, surveyDescription: string, candidateIds: string[]) {
+    currentSurveyId = surveyId;
+    selectedCandidateId = null;
+    
+    // Actualizar información del modal
+    const modalName = document.getElementById('modalSurveyName');
+    const modalDesc = document.getElementById('modalSurveyDescription');
+    if (modalName) modalName.textContent = surveyName;
+    if (modalDesc) modalDesc.textContent = surveyDescription;
+    
+    // Mostrar modal
+    const modal = document.getElementById('votingModal');
+    modal?.classList.remove('hidden');
+    
+    // Mostrar loading, ocultar lista y error
+    const loading = document.getElementById('modalLoading');
+    const candidatesList = document.getElementById('modalCandidatesList');
+    const errorDiv = document.getElementById('modalError');
+    const confirmBtn = document.getElementById('confirmVoteBtn') as HTMLButtonElement;
+    
+    loading?.classList.remove('hidden');
+    candidatesList?.classList.add('hidden');
+    errorDiv?.classList.add('hidden');
+    if (confirmBtn) confirmBtn.disabled = true;
+    
+    try {
+      // Verificar si el usuario ya votó
+      let hasVoted = false;
+      if (freighterService.publicKey) {
+        const checkResponse = await fetch(`${API_URL}/api/surveys/${surveyId}/check-vote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voterAddress: freighterService.publicKey })
+        });
+        
+        const checkData = await checkResponse.json();
+        hasVoted = checkData.hasVoted;
+      }
+      
+      // Cargar resultados actuales
+      const resultsResponse = await fetch(`${API_URL}/api/surveys/${surveyId}/results`);
+      const results = await resultsResponse.json();
+      
+      // Cargar candidatos
+      const candidates = await Promise.all(
+        candidateIds.map(async (id) => {
+          const response = await fetch(`${API_URL}/api/candidates/${id}`);
+          return response.json();
+        })
+      );
+      
+      // Ocultar loading, mostrar lista
+      loading?.classList.add('hidden');
+      candidatesList?.classList.remove('hidden');
+      
+      // Renderizar candidatos
+      if (candidatesList) {
+        if (hasVoted) {
+          // Si ya votó, solo mostrar resultados
+          candidatesList.innerHTML = `
+            <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+              <p class="text-yellow-300 font-semibold">✓ Ya has votado en esta encuesta</p>
+            </div>
+            <h4 class="text-lg font-semibold text-white mb-4">Resultados actuales:</h4>
+            ${renderVoteResults(results)}
+          `;
+        } else {
+          // Si no ha votado, mostrar opciones + resultados parciales
+          candidatesList.innerHTML = `
+            <h4 class="text-lg font-semibold text-white mb-4">Selecciona tu candidato:</h4>
+            <div class="space-y-3 mb-6">
+              ${candidates.map((candidate: Candidate) => `
+                <label class="group cursor-pointer">
+                  <div class="flex items-center gap-4 p-4 rounded-xl border-2 border-white/20 hover:border-purple-500/50 transition-all duration-300 hover:bg-white/5">
+                    <input type="radio" name="candidate" value="${candidate._id}" 
+                      onchange="selectCandidate('${candidate._id}')"
+                      class="w-5 h-5 text-purple-600 focus:ring-purple-500">
+                    <div class="flex-1">
+                      <h4 class="text-white font-bold text-lg">${candidate.name}</h4>
+                      ${candidate.party ? `<p class="text-gray-400 text-sm">${candidate.party}</p>` : ''}
+                      ${candidate.description ? `<p class="text-gray-300 text-sm mt-1">${candidate.description}</p>` : ''}
+                    </div>
+                  </div>
+                </label>
+              `).join('')}
+            </div>
+            
+            <div class="border-t border-white/20 pt-6 mt-6">
+              <h4 class="text-sm font-semibold text-gray-400 mb-4">Resultados parciales:</h4>
+              ${renderVoteResults(results)}
+            </div>
+          `;
+        }
+      }
+      
+    } catch (error: any) {
+      console.error('Error al cargar candidatos:', error);
+      loading?.classList.add('hidden');
+      errorDiv?.classList.remove('hidden');
+      const errorMsg = document.getElementById('modalErrorMessage');
+      if (errorMsg) {
+        errorMsg.textContent = error.message || 'Error al cargar candidatos';
+      }
+    }
+  }
+
+  // Renderizar resultados de votación con visualización mejorada
+  function renderVoteResults(results: any): string {
+    if (results.totalVotes === 0) {
+      return '<p class="text-gray-400 text-sm">No hay votos aún</p>';
+    }
+    
+    // Determinar el ganador (mayor porcentaje)
+    const sortedResults = [...results.results].sort((a: any, b: any) => b.percentage - a.percentage);
+    const winnerPercentage = sortedResults[0].percentage;
+    
+    return `
+      <div class="space-y-4">
+        <p class="text-sm text-gray-400 mb-4">Total de votos: <span class="text-white font-bold text-lg">${results.totalVotes}</span></p>
+        ${sortedResults.map((result: any, index: number) => {
+          const isWinning = result.percentage === winnerPercentage && result.percentage > 0;
+          const position = index + 1;
+          
+          // Colores dinámicos según posición
+          let barColor = 'from-gray-500 to-gray-600';
+          let borderColor = 'border-gray-500/30';
+          let badgeColor = 'bg-gray-500/20 text-gray-300';
+          let emoji = '';
+          
+          if (isWinning) {
+            barColor = 'from-yellow-400 via-yellow-500 to-orange-500';
+            borderColor = 'border-yellow-400/50';
+            badgeColor = 'bg-yellow-500/20 text-yellow-300 border border-yellow-400/30';
+            emoji = '🏆 ';
+          } else if (position === 2) {
+            barColor = 'from-gray-300 to-gray-400';
+            borderColor = 'border-gray-400/40';
+            badgeColor = 'bg-gray-400/20 text-gray-300';
+            emoji = '🥈 ';
+          } else if (position === 3) {
+            barColor = 'from-orange-600 to-orange-700';
+            borderColor = 'border-orange-600/40';
+            badgeColor = 'bg-orange-600/20 text-orange-300';
+            emoji = '🥉 ';
+          } else {
+            barColor = 'from-blue-500 to-purple-500';
+            borderColor = 'border-blue-500/30';
+          }
+          
+          return `
+            <div class="relative p-4 rounded-xl bg-white/5 border-2 ${borderColor} hover:bg-white/10 transition-all duration-300 ${isWinning ? 'ring-2 ring-yellow-400/30 shadow-lg shadow-yellow-500/20' : ''}">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center gap-3">
+                  ${isWinning ? '<span class="text-2xl animate-bounce">👑</span>' : ''}
+                  <div>
+                    <span class="text-white text-base font-bold ${isWinning ? 'text-yellow-300 text-lg' : ''}">${emoji}${result.candidateName}</span>
+                    <div class="flex gap-2 mt-1">
+                      <span class="px-2 py-0.5 rounded text-xs font-semibold ${badgeColor}">#${position}</span>
+                      ${isWinning ? '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-green-500/20 text-green-300 border border-green-400/30 animate-pulse">Ganando</span>' : ''}
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-white font-bold text-xl ${isWinning ? 'text-yellow-300' : ''}">${result.percentage.toFixed(1)}%</div>
+                  <div class="text-gray-400 text-xs">${result.votes} voto${result.votes !== 1 ? 's' : ''}</div>
+                </div>
+              </div>
+              
+              <!-- Barra de progreso -->
+              <div class="relative">
+                <div class="w-full bg-black/40 rounded-full h-4 overflow-hidden shadow-inner">
+                  <div class="bg-gradient-to-r ${barColor} h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden" 
+                       style="width: ${result.percentage}%">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  // Cerrar modal
+  function closeVotingModal() {
+    const modal = document.getElementById('votingModal');
+    modal?.classList.add('hidden');
+    currentSurveyId = null;
+    selectedCandidateId = null;
+  }
+
+  // Seleccionar candidato
+  function selectCandidate(candidateId: string) {
+    selectedCandidateId = candidateId;
+    const confirmBtn = document.getElementById('confirmVoteBtn') as HTMLButtonElement;
+    if (confirmBtn) confirmBtn.disabled = false;
+  }
+
+  // Confirmar voto
+  async function confirmVote() {
+    if (!currentSurveyId || !selectedCandidateId) {
+      alert('Por favor selecciona un candidato');
+      return;
+    }
+    
+    try {
+      // Verificar conexión de wallet
+      if (!freighterService.publicKey) {
+        const connectResult = await freighterService.connect();
+        if (!connectResult.success) {
+          alert('❌ ' + connectResult.message);
+          return;
+        }
+      }
+      
+      const voterAddress = freighterService.publicKey!;
+      
+      // Deshabilitar botón durante el proceso
+      const confirmBtn = document.getElementById('confirmVoteBtn') as HTMLButtonElement;
+      const originalText = confirmBtn.innerHTML;
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '⏳ Procesando...';
+      
+      // 1. Procesar pago de 0.1 XLM
+      console.log('💰 Procesando pago de 0.1 XLM...');
+      const paymentResult = await freighterService.sendPayment(
+        'GBBP2RUEDFJQCUXFBODTTSH3RG7JGSVCSS5JZWZ7RKYDYCQXDEATA6IV', // Dirección de destino (testnet)
+        '0.1'
+      );
+      
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.message || 'Error al procesar el pago');
+      }
+      
+      console.log('✅ Pago procesado exitosamente');
+      
+      // 2. Registrar voto en backend
+      console.log('📝 Registrando voto...');
+      const voteResponse = await fetch(`${API_URL}/api/surveys/${currentSurveyId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateId: selectedCandidateId,
+          voterAddress: voterAddress
+        })
+      });
+      
+      if (!voteResponse.ok) {
+        const errorData = await voteResponse.json();
+        throw new Error(errorData.error || 'Error al registrar el voto');
+      }
+      
+      const voteData = await voteResponse.json();
+      console.log('✅ Voto registrado:', voteData);
+      
+      // Mostrar éxito
+      alert(`✅ ¡Voto registrado exitosamente!\n\nTransacción: ${paymentResult.transactionHash}\nTotal de votos: ${voteData.totalVotes}`);
+      
+      // Cerrar modal
+      closeVotingModal();
+      
+    } catch (error: any) {
+      console.error('❌ Error al votar:', error);
+      alert(`❌ Error al procesar el voto:\n\n${error.message}`);
+      
+      // Restaurar botón
+      const confirmBtn = document.getElementById('confirmVoteBtn') as HTMLButtonElement;
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '🗳️ Confirmar Voto';
+      }
+    }
+  }
+
+  // Exponer funciones globalmente
+  (window as any).openVotingModal = openVotingModal;
+  (window as any).closeVotingModal = closeVotingModal;
+  (window as any).selectCandidate = selectCandidate;
+  (window as any).confirmVote = confirmVote;
+
+  // Cargar encuestas al montar el componente
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSurveys();
+    
+    // Event delegation para botones de votar
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const voteBtn = target.closest('.vote-now-btn') as HTMLButtonElement;
+      
+      if (voteBtn) {
+        e.preventDefault();
+        const surveyId = voteBtn.dataset.surveyId!;
+        const surveyName = voteBtn.dataset.surveyName!;
+        const surveyDescription = voteBtn.dataset.surveyDescription!;
+        const candidates = JSON.parse(voteBtn.dataset.candidates || '[]');
+        
+        openVotingModal(surveyId, surveyName, surveyDescription, candidates);
+      }
+    });
+    
+    // Actualizar cada 30 segundos
+    setInterval(loadSurveys, 30000);
+  });
+</script>
+
+<style>
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

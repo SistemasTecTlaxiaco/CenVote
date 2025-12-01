@@ -3,66 +3,70 @@ import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout title="Gestión de Usuarios - CenVote">
-  <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto">
-      <div class="bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-8">Gestión de Usuarios</h1>
+  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="card-glass backdrop-blur-lg p-8 rounded-3xl border-2 border-white/20">
+        <h1 class="text-4xl font-black header-gradient mb-8">👥 Gestión de Usuarios</h1>
         
         <!-- Formulario de Registro -->
-        <form id="userForm" class="space-y-6">
+        <form id="userForm" class="space-y-6 mb-12">
+          <input type="hidden" id="userId" name="userId">
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
-              <label for="first_name" class="block text-sm font-medium text-gray-700">Nombre</label>
+              <label for="first_name" class="block text-sm font-semibold text-white mb-2">Nombre</label>
               <input type="text" id="first_name" name="first_name" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                class="input-modern">
             </div>
             <div>
-              <label for="paternal_last_name" class="block text-sm font-medium text-gray-700">Apellido Paterno</label>
+              <label for="paternal_last_name" class="block text-sm font-semibold text-white mb-2">Apellido Paterno</label>
               <input type="text" id="paternal_last_name" name="paternal_last_name" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                class="input-modern">
             </div>
             <div>
-              <label for="maternal_last_name" class="block text-sm font-medium text-gray-700">Apellido Materno</label>
+              <label for="maternal_last_name" class="block text-sm font-semibold text-white mb-2">Apellido Materno</label>
               <input type="text" id="maternal_last_name" name="maternal_last_name" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                class="input-modern">
             </div>
             <div>
-              <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
+              <label for="phone" class="block text-sm font-semibold text-white mb-2">Teléfono</label>
               <input type="tel" id="phone" name="phone" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                class="input-modern">
             </div>
-            <div>
-              <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+            <div class="sm:col-span-2">
+              <label for="email" class="block text-sm font-semibold text-white mb-2">Correo Electrónico</label>
               <input type="email" id="email" name="email" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                class="input-modern">
             </div>
           </div>
-          <div class="flex justify-end space-x-4">
-            <button type="button" id="connectWalletBtn"
-              class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-              Conectar Wallet
+          <div class="flex justify-end space-x-4 pt-4">
+            <button type="button" id="cancelBtn" style="display: none;"
+              class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 bg-gradient-to-r from-gray-600 to-gray-700 text-white hover:from-gray-700 hover:to-gray-800">
+              ❌ Cancelar
             </button>
             <button type="submit"
-              class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-              Registrar Usuario
+              class="btn-accent">
+              <span id="submitBtnText">✨ Registrar Usuario</span>
             </button>
           </div>
         </form>
 
         <!-- Lista de Usuarios -->
-        <div class="mt-8">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Usuarios Registrados</h2>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+        <div class="mt-12">
+          <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <span class="text-3xl">📋</span> Usuarios Registrados
+          </h2>
+          <div class="overflow-x-auto rounded-xl border border-white/20">
+            <table class="min-w-full divide-y divide-white/10">
+              <thead class="bg-white/5">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wallet</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Nombre</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Teléfono</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Wallet</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200" id="usersList">
+              <tbody class="bg-white/5 divide-y divide-white/10" id="usersList">
                 <!-- Los usuarios se cargarán aquí dinámicamente -->
               </tbody>
             </table>
@@ -75,55 +79,47 @@ import Layout from '../../layouts/Layout.astro';
 
 <script>
   let publicKey = null;
+  let isEditing = false;
+  let editingId = null;
 
   // Conexión con Freighter
-  async function connectWallet() {
-    try {
-      const freighter = window.freighterApi;
-      if (!freighter) {
-        alert("Por favor instala Freighter Wallet");
-        window.open("https://www.freighter.app", "_blank");
-        return;
-      }
-
-      // Verificar red
-      const network = await freighter.getNetwork();
-      if (network !== "TESTNET") {
-        alert("Por favor cambia a la red TESTNET en Freighter");
-        return;
-      }
-
-      await freighter.connect();
-      publicKey = await freighter.getPublicKey();
-      document.getElementById('connectWalletBtn').textContent = 'Wallet Conectada';
-      document.getElementById('connectWalletBtn').classList.add('bg-green-500');
-      document.getElementById('connectWalletBtn').classList.remove('bg-primary');
-
-    } catch (error) {
-      console.error("Error al conectar wallet:", error);
-      alert("Error al conectar con Freighter");
-    }
-  }
+  import { freighterService } from '../../services/FreighterService';
+  
+  const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000';
 
   // Cargar usuarios
   async function loadUsers() {
     try {
-      const response = await fetch('http://localhost:3000/api/users');
+      const response = await fetch(`${API_URL}/api/users`);
       const users = await response.json();
       const usersList = document.getElementById('usersList');
       
+      if (users.length === 0) {
+        usersList.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-8 text-center text-gray-400">
+              No hay usuarios registrados aún
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
       usersList.innerHTML = users.map(user => `
-        <tr>
-          <td class="px-6 py-4 whitespace-nowrap">
+        <tr class="hover:bg-white/10 transition-colors">
+          <td class="px-6 py-4 whitespace-nowrap text-white font-medium">
             ${user.first_name} ${user.paternal_last_name} ${user.maternal_last_name}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">${user.email}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-gray-300">${user.email}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-gray-300">${user.phone || 'N/A'}</td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <span class="text-sm text-gray-500">${user.wallet_address || 'No conectada'}</span>
+            <span class="text-sm text-gray-400 font-mono">${user.wallet_address ? user.wallet_address.slice(0, 8) + '...' : 'No conectada'}</span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-6 py-4 whitespace-nowrap space-x-2">
             <button onclick="editUser('${user._id}')"
-              class="text-indigo-600 hover:text-indigo-900 mr-2">Editar</button>
+              class="text-blue-400 hover:text-blue-300 font-semibold transition-colors">✏️ Editar</button>
+            <button onclick="deleteUser('${user._id}')"
+              class="text-red-400 hover:text-red-300 font-semibold transition-colors">🗑️ Eliminar</button>
           </td>
         </tr>
       `).join('');
@@ -132,13 +128,75 @@ import Layout from '../../layouts/Layout.astro';
     }
   }
 
-  // Registro de usuario
-  document.getElementById('userForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!publicKey) {
-      alert('Por favor conecta tu wallet primero');
+  // Editar usuario
+  async function editUser(id) {
+    try {
+      const response = await fetch(`${API_URL}/api/users/${id}`);
+      const user = await response.json();
+      
+      // Llenar el formulario
+      document.getElementById('userId').value = user._id;
+      document.getElementById('first_name').value = user.first_name;
+      document.getElementById('paternal_last_name').value = user.paternal_last_name;
+      document.getElementById('maternal_last_name').value = user.maternal_last_name;
+      document.getElementById('phone').value = user.phone;
+      document.getElementById('email').value = user.email;
+      
+      publicKey = user.wallet_address;
+      
+      // Cambiar el botón de submit
+      isEditing = true;
+      editingId = id;
+      document.getElementById('submitBtnText').textContent = '💾 Actualizar Usuario';
+      document.getElementById('cancelBtn').style.display = 'inline-block';
+      
+      // Scroll al formulario
+      document.getElementById('userForm').scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+      console.error('Error al cargar usuario:', error);
+      alert('Error al cargar datos del usuario');
+    }
+  }
+
+  // Eliminar usuario
+  async function deleteUser(id) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
       return;
     }
+    
+    try {
+      const response = await fetch(`${API_URL}/api/users/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert('Usuario eliminado exitosamente');
+        loadUsers();
+      } else {
+        throw new Error('Error al eliminar usuario');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al eliminar usuario');
+    }
+  }
+
+  // Cancelar edición
+  function cancelEdit() {
+    isEditing = false;
+    editingId = null;
+    document.getElementById('userForm').reset();
+    document.getElementById('userId').value = '';
+    document.getElementById('submitBtnText').textContent = '✨ Registrar Usuario';
+    document.getElementById('cancelBtn').style.display = 'none';
+    
+    // Limpiar public key
+    publicKey = null;
+  }
+
+  // Registro o actualización de usuario
+  document.getElementById('userForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
     const formData = new FormData(e.target);
     const userData = {
@@ -147,34 +205,52 @@ import Layout from '../../layouts/Layout.astro';
       maternal_last_name: formData.get('maternal_last_name'),
       phone: formData.get('phone'),
       email: formData.get('email'),
-      wallet_address: publicKey
+      wallet_address: publicKey || null  // Opcional: usar wallet conectada o null
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/users', {
-        method: 'POST',
+      // Guardar en MongoDB
+      const url = isEditing 
+        ? `${API_URL}/api/users/${editingId}`
+        : `${API_URL}/api/users`;
+        
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData)
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        alert('Usuario registrado exitosamente');
-        e.target.reset();
+        alert(isEditing ? 'Usuario actualizado exitosamente' : 'Usuario registrado exitosamente');
+        cancelEdit();
         loadUsers();
       } else {
-        throw new Error('Error al registrar usuario');
+        // Mostrar el error específico del backend
+        const errorMsg = data.error || 'Error desconocido al guardar usuario';
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error al registrar usuario');
+      console.error('Error completo:', error);
+      alert('Error al guardar usuario: ' + error.message);
     }
   });
 
   // Event Listeners
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
+  document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+    
+    // Cargar usuarios
     loadUsers();
   });
+
+  // Hacer funciones globales
+  window.editUser = editUser;
+  window.deleteUser = deleteUser;
 </script>
+</Layout>

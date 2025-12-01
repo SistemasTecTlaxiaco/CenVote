@@ -9,11 +9,14 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@stellar/freighter-api": "^5.0.0",
+    "@stellar/stellar-sdk": "^14.3.3",
     "astro": "^4.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "mongoose": "^8.19.2"
+    "mongoose": "^8.20.1",
+    "stellar-sdk": "^13.3.0"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^5.0.2",

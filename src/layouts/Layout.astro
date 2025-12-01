@@ -9,48 +9,60 @@ const { title } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="CenVote - Decentralized Voting Platform" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content="CenVote - Plataforma de Votación Descentralizada" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
+		<meta name="theme-color" content="#0F172A" />
 		<title>{title}</title>
+		<!-- Cargar Freighter API desde CDN -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-freighter-api/1.7.1/index.min.js"></script>
 		<script>
 			// Freighter Wallet Integration
-			declare global {
-				interface Window {
-					freighterApi: any;
-				}
-			}
+			const initFreighter = () => {
+				let attempts = 0;
+				const maxAttempts = 10;
+				
+				const checkFreighter = () => {
+					console.log('Verificando Freighter...', {
+						hasFreighter: !!window.freighter,
+						hasFreighterApi: !!window.freighterApi
+					});
 
-			const checkFreighterConnection = async () => {
-				if (window.freighterApi) {
-					try {
-						const connected = await window.freighterApi.isConnected();
-						if (!connected) {
-							console.log("Freighter not connected");
-							return false;
-						}
-						const publicKey = await window.freighterApi.getPublicKey();
-						console.log("Connected with public key:", publicKey);
-						return true;
-					} catch (e) {
-						console.error("Error connecting to Freighter:", e);
-						return false;
+					if (window.freighter && window.freighterApi) {
+						console.log('Freighter detectado correctamente');
+						return;
 					}
+
+					attempts++;
+					if (attempts < maxAttempts) {
+						console.log(`Intento ${attempts} de ${maxAttempts}`);
+						setTimeout(checkFreighter, 1000);
+					} else {
+						console.log('No se pudo detectar Freighter después de varios intentos');
+					}
+				};
+
+				// Iniciar verificación cuando el DOM esté listo
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', checkFreighter);
 				} else {
-					console.log("Freighter not installed");
-					return false;
+					checkFreighter();
 				}
 			};
 
-			// Initialize wallet connection
-			document.addEventListener('DOMContentLoaded', checkFreighterConnection);
+			initFreighter();
 		</script>
 	</head>
-	<body class="min-h-screen bg-gray-100">
+	<body class="bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950 min-h-screen text-gray-100">
+		<!-- Efecto de fondo animado -->
+		<div class="fixed inset-0 -z-10">
+			<div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 opacity-50"></div>
+			<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-4xl bg-gradient-radial from-purple-500/20 to-transparent rounded-full blur-3xl opacity-20"></div>
+		</div>
 		<slot />
 	</body>
 </html>

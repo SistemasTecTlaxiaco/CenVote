@@ -1,0 +1,7 @@
+[dotenv@17.2.3] injecting env (2) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+(node:43225) [MONGOOSE] Warning: Duplicate schema index on {"email":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+🚀 Server running on port 3000
+📱 Passkey API: http://localhost:3000/api/passkey/
+🔍 Debug: http://localhost:3000/api/debug
+✅ Connected to MongoDB

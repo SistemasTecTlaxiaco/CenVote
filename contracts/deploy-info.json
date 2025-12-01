@@ -1,0 +1,44 @@
+{
+    "network": "testnet",
+    "deployed_at": "2025-11-27",
+    "contracts": {
+        "user_registry": {
+            "contract_id": "",
+            "wasm_hash": "c39b6e584d2ff82e802f40eb0f50444c23e1c75170cf410477a5e92e73ccd20b",
+            "functions": [
+                "register_user",
+                "get_user",
+                "user_exists",
+                "get_user_count"
+            ]
+        },
+        "candidate_registry": {
+            "contract_id": "",
+            "wasm_hash": "86f09dbd2d42912bbf6a2b4f4cf17a3f7bae9092211c57fc94cbaa1fa91ec771",
+            "functions": [
+                "register_candidate",
+                "get_candidate",
+                "candidate_exists",
+                "get_all_candidates",
+                "get_candidate_count"
+            ]
+        },
+        "survey": {
+            "contract_id": "",
+            "wasm_hash": "4db8d5e2f97bde7eb74e171acdbcde45956bafe95a539cbea7b3ec681e5dcfae",
+            "functions": [
+                "initialize",
+                "create_survey",
+                "vote",
+                "get_survey",
+                "has_voted",
+                "get_vote",
+                "get_results",
+                "get_total_votes",
+                "get_survey_count",
+                "get_vote_fee"
+            ]
+        }
+    },
+    "note": "Contract IDs will be updated after successful deployment to testnet"
+}

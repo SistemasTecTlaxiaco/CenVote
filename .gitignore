@@ -22,3 +22,12 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# stellar
+.stellar/
+
+# rust build artifacts
+**/target/
+
+# backend logs
+backend/server.log

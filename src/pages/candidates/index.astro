@@ -3,51 +3,93 @@ import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout title="Gestión de Candidatos - CenVote">
-  <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto">
-      <div class="bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-8">Gestión de Candidatos</h1>
+  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="card-glass backdrop-blur-lg p-8 rounded-3xl border-2 border-white/20">
+        <h1 class="text-4xl font-black header-gradient mb-8">🎯 Gestión de Candidatos</h1>
         
+        <!-- Usuarios Disponibles -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <span class="text-3xl">👥</span> Usuarios Disponibles
+          </h2>
+          
+          <!-- Buscador de Usuarios -->
+          <div class="mb-4 relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span class="text-gray-400 text-xl">🔍</span>
+            </div>
+            <input type="text" id="userSearchInput" placeholder="Buscar por nombre, RFC o wallet..."
+              class="input-modern pl-12 w-full">
+          </div>
+          
+          <!-- Lista de Usuarios -->
+          <div class="overflow-x-auto rounded-xl border border-white/20 max-h-96">
+            <table class="min-w-full divide-y divide-white/10">
+              <thead class="bg-white/5 sticky top-0">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Nombre</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Wallet</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Acción</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white/5 divide-y divide-white/10" id="usersList">
+                <!-- Los usuarios se cargarán aquí dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Formulario de Candidato -->
-        <form id="candidateForm" class="space-y-6">
+        <form id="candidateForm" class="space-y-6 mb-12">
+          <input type="hidden" id="candidateId" name="candidateId">
+          <input type="hidden" id="selectedUserId" name="selectedUserId">
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
-              <label for="name" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-              <input type="text" id="name" name="name" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+              <label for="name" class="block text-sm font-semibold text-white mb-2">Nombre Completo</label>
+              <input type="text" id="name" name="name" required readonly
+                class="input-modern bg-white/10 cursor-not-allowed">
             </div>
             <div>
-              <label for="rfc" class="block text-sm font-medium text-gray-700">RFC</label>
-              <input type="text" id="rfc" name="rfc" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+              <label for="rfc" class="block text-sm font-semibold text-white mb-2">Email del Usuario</label>
+              <input type="text" id="rfc" name="rfc" required readonly
+                class="input-modern bg-white/10 cursor-not-allowed">
             </div>
           </div>
-          <div class="flex justify-end space-x-4">
-            <button type="button" id="connectWalletBtn"
-              class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-              Conectar Wallet
-            </button>
-            <button type="submit"
-              class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-              Registrar Candidato
-            </button>
+          <div class="flex justify-between items-center pt-4">
+            <div id="selectedUserInfo" class="text-sm text-gray-300" style="display: none;">
+              <span class="text-green-400">✓</span> Usuario seleccionado
+            </div>
+            <div class="flex space-x-4 ml-auto">
+              <button type="button" id="cancelBtn" style="display: none;"
+                class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 bg-gradient-to-r from-gray-600 to-gray-700 text-white hover:from-gray-700 hover:to-gray-800">
+                ❌ Cancelar
+              </button>
+              <button type="submit" id="submitCandidateBtn"
+                class="btn-accent" disabled>
+                <span id="submitBtnText">✨ Registrar Candidato</span>
+              </button>
+            </div>
           </div>
         </form>
 
         <!-- Lista de Candidatos -->
-        <div class="mt-8">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Candidatos Registrados</h2>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+        <div class="mt-12">
+          <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <span class="text-3xl">📋</span> Candidatos Registrados
+          </h2>
+          <div class="overflow-x-auto rounded-xl border border-white/20">
+            <table class="min-w-full divide-y divide-white/10">
+              <thead class="bg-white/5">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RFC</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wallet</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Nombre</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">RFC</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Wallet</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200" id="candidatesList">
+              <tbody class="bg-white/5 divide-y divide-white/10" id="candidatesList">
                 <!-- Los candidatos se cargarán aquí dinámicamente -->
               </tbody>
             </table>
@@ -60,81 +102,273 @@ import Layout from '../../layouts/Layout.astro';
 
 <script>
   let publicKey = null;
+  let isEditing = false;
+  let editingId = null;
+  let allUsers = [];
+  let candidateWallets = new Set();
+  let selectedUser = null;
 
   // Conexión con Freighter
-  async function connectWallet() {
-    try {
-      const freighter = window.freighterApi;
-      if (!freighter) {
-        alert("Por favor instala Freighter Wallet");
-        window.open("https://www.freighter.app", "_blank");
-        return;
+  import { freighterService } from '../../services/FreighterService';
+  
+  const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000';
+
+  // Auto-detectar wallet conectada
+  async function autoDetectWallet() {
+    if (freighterService.publicKey) {
+      publicKey = freighterService.publicKey;
+      console.log('✅ Wallet auto-detectada:', publicKey.slice(0, 8) + '...');
+    } else {
+      const isConnected = await freighterService.checkConnection();
+      if (isConnected) {
+        const result = await freighterService.connect();
+        if (result.success) {
+          publicKey = result.publicKey;
+          console.log('✅ Wallet reconectada automáticamente');
+        }
       }
-
-      // Verificar red
-      const network = await freighter.getNetwork();
-      if (network !== "TESTNET") {
-        alert("Por favor cambia a la red TESTNET en Freighter");
-        return;
-      }
-
-      await freighter.connect();
-      publicKey = await freighter.getPublicKey();
-      document.getElementById('connectWalletBtn').textContent = 'Wallet Conectada';
-      document.getElementById('connectWalletBtn').classList.add('bg-green-500');
-      document.getElementById('connectWalletBtn').classList.remove('bg-primary');
-
-    } catch (error) {
-      console.error("Error al conectar wallet:", error);
-      alert("Error al conectar con Freighter");
     }
   }
 
-  // Cargar candidatos
+  // Cargar usuarios disponibles
+  async function loadUsers() {
+    try {
+      const response = await fetch(`${API_URL}/api/users`);
+      allUsers = await response.json();
+      renderUsers(allUsers);
+    } catch (error) {
+      console.error('Error al cargar usuarios:', error);
+    }
+  }
+
+  // Cargar candidatos para marcar usuarios que ya son candidatos
   async function loadCandidates() {
     try {
-      const response = await fetch('http://localhost:3000/api/candidates');
+      const response = await fetch(`${API_URL}/api/candidates`);
       const candidates = await response.json();
+      
+      // Crear un Set con las wallets de candidatos existentes
+      candidateWallets = new Set(
+        candidates
+          .map(c => c.wallet_address)
+          .filter(w => w) // Filtrar wallets nulas
+      );
+      
       const candidatesList = document.getElementById('candidatesList');
       
+      if (candidates.length === 0) {
+        candidatesList.innerHTML = `
+          <tr>
+            <td colspan="4" class="px-6 py-8 text-center text-gray-400">
+              No hay candidatos registrados aún
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
       candidatesList.innerHTML = candidates.map(candidate => `
-        <tr>
-          <td class="px-6 py-4 whitespace-nowrap">${candidate.name}</td>
-          <td class="px-6 py-4 whitespace-nowrap">${candidate.rfc}</td>
+        <tr class="hover:bg-white/10 transition-colors">
+          <td class="px-6 py-4 whitespace-nowrap text-white font-medium">${candidate.name}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-gray-300">${candidate.rfc}</td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <span class="text-sm text-gray-500">${candidate.wallet_address || 'No conectada'}</span>
+            <span class="text-sm text-gray-400 font-mono">${candidate.wallet_address ? candidate.wallet_address.slice(0, 8) + '...' : 'No conectada'}</span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-6 py-4 whitespace-nowrap space-x-2">
             <button onclick="editCandidate('${candidate._id}')"
-              class="text-indigo-600 hover:text-indigo-900 mr-2">Editar</button>
+              class="text-blue-400 hover:text-blue-300 font-semibold transition-colors">✏️ Editar</button>
             <button onclick="deleteCandidate('${candidate._id}')"
-              class="text-red-600 hover:text-red-900">Eliminar</button>
+              class="text-red-400 hover:text-red-300 font-semibold transition-colors">🗑️ Eliminar</button>
           </td>
         </tr>
       `).join('');
+
+      // Re-renderizar lista de usuarios para mostrar cuales ya son candidatos
+      renderUsers(allUsers);
     } catch (error) {
       console.error('Error al cargar candidatos:', error);
     }
   }
 
-  // Registro de candidato
-  document.getElementById('candidateForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!publicKey) {
-      alert('Por favor conecta tu wallet primero');
+  // Renderizar lista de usuarios
+  function renderUsers(users) {
+    const usersList = document.getElementById('usersList');
+    
+    if (users.length === 0) {
+      usersList.innerHTML = `
+        <tr>
+          <td colspan="4" class="px-6 py-8 text-center text-gray-400">
+            No se encontraron usuarios
+          </td>
+        </tr>
+      `;
       return;
     }
+    
+    usersList.innerHTML = users.map(user => {
+      const isCandidate = candidateWallets.has(user.wallet_address);
+      const fullName = `${user.first_name || ''} ${user.paternal_last_name || ''} ${user.maternal_last_name || ''}`.trim();
+      
+      return `
+        <tr class="hover:bg-white/10 transition-colors ${isCandidate ? 'opacity-50' : ''}">
+          <td class="px-6 py-4 whitespace-nowrap text-white font-medium">
+            ${fullName || 'Sin nombre'}
+            ${isCandidate ? '<span class="ml-2 text-xs bg-green-600 px-2 py-1 rounded">Ya es candidato</span>' : ''}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-gray-300">${user.email || 'N/A'}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="text-sm text-gray-400 font-mono">${user.wallet_address ? user.wallet_address.slice(0, 8) + '...' : 'No conectada'}</span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            ${isCandidate 
+              ? '<span class="text-gray-500 text-sm">✓ Registrado</span>'
+              : `<button onclick='selectUser(${JSON.stringify(user).replace(/'/g, "&apos;")})' 
+                   class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300">
+                   ✓ Seleccionar
+                 </button>`
+            }
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Buscar usuarios
+  function searchUsers(query) {
+    const searchTerm = query.toLowerCase().trim();
+    
+    if (!searchTerm) {
+      renderUsers(allUsers);
+      return;
+    }
+    
+    const filtered = allUsers.filter(user => {
+      const fullName = `${user.first_name || ''} ${user.paternal_last_name || ''} ${user.maternal_last_name || ''}`.toLowerCase();
+      return (
+        fullName.includes(searchTerm) ||
+        user.email?.toLowerCase().includes(searchTerm) ||
+        user.wallet_address?.toLowerCase().includes(searchTerm)
+      );
+    });
+    
+    renderUsers(filtered);
+  }
+
+  // Seleccionar usuario para el formulario
+  function selectUser(user) {
+    selectedUser = user;
+    
+    // Construir nombre completo
+    const fullName = `${user.first_name || ''} ${user.paternal_last_name || ''} ${user.maternal_last_name || ''}`.trim();
+    
+    // Rellenar formulario
+    document.getElementById('selectedUserId').value = user._id;
+    document.getElementById('name').value = fullName;
+    document.getElementById('rfc').value = user.email || '';
+    publicKey = user.wallet_address;
+    
+    // Mostrar indicador de usuario seleccionado
+    document.getElementById('selectedUserInfo').style.display = 'block';
+    document.getElementById('submitCandidateBtn').disabled = false;
+    document.getElementById('submitCandidateBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+    
+    // Scroll al formulario
+    document.getElementById('candidateForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    console.log('✅ Usuario seleccionado:', fullName);
+  }
+
+  // Editar candidato
+  async function editCandidate(id) {
+    try {
+      const response = await fetch(`${API_URL}/api/candidates/${id}`);
+      const candidate = await response.json();
+      
+      // Llenar el formulario
+      document.getElementById('candidateId').value = candidate._id;
+      document.getElementById('name').value = candidate.name;
+      document.getElementById('rfc').value = candidate.rfc;
+      
+      publicKey = candidate.wallet_address;
+      
+      // Cambiar el botón de submit
+      isEditing = true;
+      editingId = id;
+      document.getElementById('submitBtnText').textContent = '💾 Actualizar Candidato';
+      document.getElementById('cancelBtn').style.display = 'inline-block';
+      document.getElementById('selectedUserInfo').style.display = 'none';
+      document.getElementById('submitCandidateBtn').disabled = false;
+      document.getElementById('submitCandidateBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+      
+      // Scroll al formulario
+      document.getElementById('candidateForm').scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+      console.error('Error al cargar candidato:', error);
+      alert('Error al cargar datos del candidato');
+    }
+  }
+
+  // Eliminar candidato
+  async function deleteCandidate(id) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este candidato?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/api/candidates/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert('Candidato eliminado exitosamente');
+        await loadCandidates();
+        await loadUsers(); // Recargar para actualizar el estado
+      } else {
+        throw new Error('Error al eliminar candidato');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al eliminar candidato');
+    }
+  }
+
+  // Cancelar edición
+  function cancelEdit() {
+    isEditing = false;
+    editingId = null;
+    selectedUser = null;
+    document.getElementById('candidateForm').reset();
+    document.getElementById('candidateId').value = '';
+    document.getElementById('selectedUserId').value = '';
+    document.getElementById('submitBtnText').textContent = '✨ Registrar Candidato';
+    document.getElementById('cancelBtn').style.display = 'none';
+    document.getElementById('selectedUserInfo').style.display = 'none';
+    document.getElementById('submitCandidateBtn').disabled = true;
+    document.getElementById('submitCandidateBtn').classList.add('opacity-50', 'cursor-not-allowed');
+    
+    publicKey = null;
+  }
+
+  // Registro o actualización de candidato
+  document.getElementById('candidateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
     const formData = new FormData(e.target);
     const candidateData = {
       name: formData.get('name'),
       rfc: formData.get('rfc'),
-      wallet_address: publicKey
+      wallet_address: publicKey || null
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/candidates', {
-        method: 'POST',
+      const url = isEditing 
+        ? `${API_URL}/api/candidates/${editingId}`
+        : `${API_URL}/api/candidates`;
+        
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -142,21 +376,40 @@ import Layout from '../../layouts/Layout.astro';
       });
 
       if (response.ok) {
-        alert('Candidato registrado exitosamente');
-        e.target.reset();
-        loadCandidates();
+        alert(isEditing ? 'Candidato actualizado exitosamente' : 'Candidato registrado exitosamente');
+        cancelEdit();
+        await loadCandidates();
+        await loadUsers(); // Recargar para actualizar el estado
       } else {
-        throw new Error('Error al registrar candidato');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al guardar candidato');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al registrar candidato');
+      alert('Error al guardar candidato: ' + error.message);
     }
   });
 
   // Event Listeners
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
-    loadCandidates();
+  document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+    
+    // Buscador de usuarios
+    document.getElementById('userSearchInput').addEventListener('input', (e) => {
+      searchUsers(e.target.value);
+    });
+    
+    // Auto-detectar wallet al cargar
+    await autoDetectWallet();
+    
+    // Cargar datos
+    await loadUsers();
+    await loadCandidates();
   });
+
+  // Hacer funciones globales
+  window.selectUser = selectUser;
+  window.editCandidate = editCandidate;
+  window.deleteCandidate = deleteCandidate;
 </script>
+</Layout>

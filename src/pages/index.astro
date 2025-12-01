@@ -1,271 +1,240 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import WalletConnector from '../components/WalletConnector.astro';
+import PasskeyConnector from '../components/PasskeyConnector.astro';
+import SurveyCardGrid from '../components/SurveyCardGrid.astro';
+
+// Definir las variables que se usarán en el cliente
+const CONTRACT_ID = "GC627W5PYYE5SXWAKC4LB72OYY3JMCP33N7KZ6EILCWAQNHIQDMB3O5W";
 ---
 
 <Layout title="CenVote - Sistema de Votación Descentralizada">
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950">
     <!-- Header/Navigation -->
-    <nav class="bg-white shadow-lg">
+    <nav class="backdrop-blur-xl bg-white/5 border-b border-white/10 sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
+        <div class="flex justify-between h-20">
+          <div class="flex items-center space-x-12">
             <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-2xl font-bold text-primary">CenVote</h1>
+              <h1 class="text-3xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">CenVote</h1>
             </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <a href="/users" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-primary">
-                Usuarios
+            <div class="hidden sm:flex sm:space-x-1">
+              <a href="/users" class="nav-link px-3 py-2 rounded-lg">
+                👥 Usuarios
               </a>
-              <a href="/candidates" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-primary">
-                Candidatos
+              <a href="/candidates" class="nav-link px-3 py-2 rounded-lg">
+                🎯 Candidatos
               </a>
-              <a href="/surveys" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-primary">
-                Encuestas
+              <a href="/surveys" class="nav-link px-3 py-2 rounded-lg">
+                📊 Encuestas
               </a>
             </div>
           </div>
           <div class="flex items-center">
-            <button id="connectWalletBtn"
-              class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-              Conectar Wallet
-            </button>
+            <WalletConnector />
           </div>
         </div>
       </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <h2 class="text-4xl font-extrabold text-gray-900 mb-4">
+    <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <!-- Hero Section -->
+      <div class="text-center mb-16 animate-fadeInUp">
+        <h2 class="text-5xl sm:text-6xl font-black mb-6 header-gradient">
           Bienvenido a CenVote
         </h2>
-        <p class="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
-          Sistema de votación descentralizado seguro y transparente
+        <p class="mt-6 max-w-3xl mx-auto text-xl text-gray-300 font-light">
+          La plataforma de votación descentralizada más segura y transparente
         </p>
-        <div class="mt-10 grid gap-6 md:grid-cols-3">
-          <a href="/users"
-            class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestión de Usuarios</h3>
-            <p class="text-gray-600">Registra y administra usuarios en el sistema</p>
+        <div class="mt-8 flex justify-center gap-4">
+          <a href="/surveys" class="btn-primary">
+            ✨ Comenzar
           </a>
-          <a href="/candidates"
-            class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestión de Candidatos</h3>
-            <p class="text-gray-600">Administra los candidatos para las votaciones</p>
-          </a>
-          <a href="/surveys"
-            class="p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestión de Encuestas</h3>
-            <p class="text-gray-600">Crea y administra encuestas de votación</p>
+          <a href="/candidates" class="btn-secondary">
+            📖 Conocer Más
           </a>
         </div>
       </div>
+
+      <!-- Authentication Section -->
+      <div class="card-glass backdrop-blur-lg bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/10 border-2 border-white/20 rounded-3xl p-12 mb-16 shadow-2xl">
+        <h3 class="text-3xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+          🔐 Autenticación Segura
+        </h3>
+        <p class="text-gray-300 text-center mb-8 text-lg">Autentica usando Passkey (WebAuthn) + Freighter Wallet para máxima seguridad</p>
+        <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
+          <PasskeyConnector />
+        </div>
+      </div>
+
+      <!-- Features Grid -->
+      <div class="grid md:grid-cols-3 gap-8 mb-16">
+        <!-- Users Card -->
+        <a href="/users" class="card-gradient group hover:scale-105 transition-transform duration-300 p-8 rounded-2xl border border-white/20 backdrop-blur-xl hover:border-blue-500/50">
+          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">👥</div>
+          <h3 class="text-2xl font-bold text-white mb-3">Gestión de Usuarios</h3>
+          <p class="text-gray-400 text-lg">Registra y administra usuarios en el sistema con total seguridad</p>
+          <div class="mt-6 text-blue-400 group-hover:translate-x-2 transition-transform">→ Ver más</div>
+        </a>
+
+        <!-- Candidates Card -->
+        <a href="/candidates" class="card-gradient group hover:scale-105 transition-transform duration-300 p-8 rounded-2xl border border-white/20 backdrop-blur-xl hover:border-purple-500/50">
+          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🎯</div>
+          <h3 class="text-2xl font-bold text-white mb-3">Gestión de Candidatos</h3>
+          <p class="text-gray-400 text-lg">Administra candidatos para las votaciones de forma descentralizada</p>
+          <div class="mt-6 text-purple-400 group-hover:translate-x-2 transition-transform">→ Ver más</div>
+        </a>
+
+        <!-- Surveys Card -->
+        <a href="/surveys" class="card-gradient group hover:scale-105 transition-transform duration-300 p-8 rounded-2xl border border-white/20 backdrop-blur-xl hover:border-pink-500/50">
+          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">📊</div>
+          <h3 class="text-2xl font-bold text-white mb-3">Gestión de Encuestas</h3>
+          <p class="text-gray-400 text-lg">Crea y administra encuestas de votación en tiempo real</p>
+          <div class="mt-6 text-pink-400 group-hover:translate-x-2 transition-transform">→ Ver más</div>
+        </a>
+      </div>
+
+      <!-- Stats Section -->
+      <div class="grid md:grid-cols-4 gap-6 mb-16">
+        <div class="card-glass p-6 text-center rounded-2xl">
+          <div class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-2">100%</div>
+          <p class="text-gray-400">Seguro</p>
+        </div>
+        <div class="card-glass p-6 text-center rounded-2xl">
+          <div class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent mb-2">24/7</div>
+          <p class="text-gray-400">Disponible</p>
+        </div>
+        <div class="card-glass p-6 text-center rounded-2xl">
+          <div class="text-4xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent mb-2">∞</div>
+          <p class="text-gray-400">Escalable</p>
+        </div>
+        <div class="card-glass p-6 text-center rounded-2xl">
+          <div class="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent mb-2">⚡</div>
+          <p class="text-gray-400">Rápido</p>
+        </div>
+      </div>
+      </div>
+
+      <!-- Active Surveys Section (Full Width) -->
+      <div class="mt-24 mb-12 animate-fadeInUp delay-300">
+        <SurveyCardGrid />
+      </div>
     </div>
   </div>
-</Layout>
 
 <script>
-  let publicKey = null;
+import { freighterService } from '../services/FreighterService';
 
-  async function connectWallet() {
-    try {
-      const freighter = window.freighterApi;
-      if (!freighter) {
-        alert("Por favor instala Freighter Wallet");
-        window.open("https://www.freighter.app", "_blank");
-        return;
+// El CONTRACT_ID se pasa desde el servidor
+declare const CONTRACT_ID: string;
+
+async function invokeContractFunction(method: string, args: any[] = []) {
+  try {
+    console.log('📞 Invocando función de contrato:', method);
+
+    // Verificar instalación de Freighter
+    const isInstalled = await freighterService.isFreighterInstalled();
+    if (!isInstalled) {
+      const shouldInstall = confirm('Freighter no está instalado. ¿Deseas ir a la página de instalación?');
+      if (shouldInstall) {
+        window.open('https://www.freighter.app', '_blank');
       }
-
-      // Verificar red
-      const network = await freighter.getNetwork();
-      if (network !== "TESTNET") {
-        alert("Por favor cambia a la red TESTNET en Freighter");
-        return;
-      }
-
-      await freighter.connect();
-      publicKey = await freighter.getPublicKey();
-      document.getElementById('connectWalletBtn').textContent = 'Wallet Conectada';
-      document.getElementById('connectWalletBtn').classList.add('bg-green-500');
-      document.getElementById('connectWalletBtn').classList.remove('bg-primary');
-
-    } catch (error) {
-      console.error("Error al conectar wallet:", error);
-      alert("Error al conectar con Freighter");
+      return;
     }
-  }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
-  });
-</script>
-</Layout>
-<body>
-  <div class="container">
-    <center><h1>CenVote</h1></center>
-    <center><h2 style="padding:15px;">Sistema de Votación Descentralizada</h2></center>
-    <center>
-      <button class="btn btn-primary" type="button" onclick="conectarWallet()" style="padding: 10px; width: 150px; height: 50px; border-radius: 30px;">
-        Conectar Wallet
-      </button>
-      <p id="walletStatus"></p>
-    </center>
-  </div>
-
-  <!-- Formulario para registrar usuario -->
-  <div class="container">
-    <form id="addUserForm">
-      <center><h2 style="border-radius: 25px;">Registrar Usuario</h2></center>
-      <input name="user_id" placeholder="ID de usuario" required />
-      <input name="first_name" placeholder="Nombre" required />
-      <input name="paternal_last_name" placeholder="Apellido paterno" required />
-      <input name="maternal_last_name" placeholder="Apellido materno" required />
-      <input name="phone" placeholder="Teléfono" required />
-      <input name="email" placeholder="Correo electrónico" required />
-      <button type="submit">Registrar Usuario</button>
-    </form>
-  </div>
-  <!-- Formulario para registrar candidato -->
-	<div class="container">
-    <form id="addCandidateForm">
-      <center><h2>Registrar Candidato</h2></center>
-      <input name="candidate_id" placeholder="ID del candidato" required />
-      <input name="user_id" placeholder="ID del usuario existente" required />
-      <input name="rfc" placeholder="RFC" required />
-      <button type="submit">Registrar Candidato</button>
-    </form>
-	</div>
-
-    <!-- Formulario para emitir un voto -->
-	<div class="container">
-    <form id="voteForm">
-      <center><h2>Votar por Candidato</h2></center>
-      <input name="id_voto" placeholder="ID del voto" required />
-      <input name="id_usuario" placeholder="ID del usuario" required />
-      <input name="id_candidato" placeholder="ID del candidato" required />
-      <input name="fecha_voto" type="date" required />
-      <button type="submit">Votar</button>
-    </form>
-	</div>
-
-    <!-- Formulario para crear encuesta -->
-	<div class="container">
-    <form id="createSurveyForm">
-      <center><h2>Crear Encuesta</h2></center>
-      <input name="id_encuesta" placeholder="ID de encuesta" required />
-      <input name="nombre_encuesta" placeholder="Nombre de encuesta" required />
-      <input name="descripcion" placeholder="Descripción" required />
-      <input name="fecha_creacion" type="date" required />
-      <input name="fecha_culminacion" type="date" required />
-      <input name="id_voto" placeholder="ID de voto" required />
-      <input name="id_candidato" placeholder="ID del candidato" required />
-      <button type="submit">Crear Encuesta</button>
-    </form>
-	</div>
-
-    <!-- Formulario para autenticación -->
-	<div class="container">
-    <form id="authForm">
-      <center><h2>Autenticación</h2></center>
-      <input name="id" placeholder="ID" required />
-      <input name="rfc" placeholder="RFC" required />
-      <button type="submit">Autenticar</button>
-    </form>
-	</div>
-
-  <script type="module">
-  const CONTRACT_ID = "GC627W5PYYE5SXWAKC4LB72OYY3JMCP33N7KZ6EILCWAQNHIQDMB3O5W";
-  let publicKey = null;
-
-  async function conectarWallet() {
-    try {
-      const freighter = window.freighterApi || window.freighter || (window.self !== window.top && window.parent.freighter);
-
-      if (!freighter) {
-        throw new Error("Freighter no está instalado o no está disponible en esta página.");
-      }
-
-      // Obtener clave pública: esto abrirá el prompt de conexión
-      publicKey = await freighter.getPublicKey();
-
-      const network = await freighter.getNetwork();
-
-      // Forzar uso de TESTNET si no está en esa red
-      if (network !== "TESTNET") {
-        alert("Estás en la red equivocada. Por favor, cambia a TESTNET desde Freighter.");
-        return;
-      }
-
-      document.getElementById('walletStatus').innerText = `Wallet conectada: ${publicKey}`;
-      document.getElementById('walletStatus').style.color = "green";
-      alert(` Wallet conectada: ${publicKey}\nRed: ${network}`);
-    } catch (error) {
-      console.error("Error al conectar con Freighter:", error);
-      document.getElementById('walletStatus').innerText = " Error al conectar wallet";
-      document.getElementById('walletStatus').style.color = "red";
-
-      if (error.message.includes("Freighter")) {
-        window.open("https://www.freighter.app", "_blank");
-      }
-    }
-  }
-
-  async function invokeContractFunction(method, args = []) {
-    if (!publicKey) {
+    // Verificar conexión
+    if (!freighterService.isConnected) {
       const shouldConnect = confirm("Debes conectar tu wallet primero. ¿Conectar ahora?");
       if (shouldConnect) {
-        await conectarWallet();
+        const result = await freighterService.connect();
+        if (!result.success) {
+          alert(`❌ ${result.message}`);
+          return;
+        }
       } else {
         return;
       }
     }
 
-    try {
-      const freighter = window.freighterApi || window.freighter;
-
-      const transactionXDR = await freighter.getTransaction({
-        network: "TESTNET",
-        source: publicKey,
-        contractId: CONTRACT_ID,
-        method,
-        args
-      });
-
-      const txResponse = await freighter.signAndSubmitTransaction(transactionXDR);
-
-      alert(` Transacción enviada\nHash: ${txResponse.hash}`);
-      console.log("Transacción completada:", txResponse);
-      return txResponse;
-    } catch (err) {
-      console.error("Error en invokeContractFunction:", err);
-      alert(` Error en la transacción:\n${err.message}`);
-      throw err;
+    // Verificar disponibilidad de la API
+    const freighterApi = (window as any).freighterApi;
+    if (!freighterApi) {
+      alert('No se puede acceder a la API de Freighter. Por favor recarga la página.');
+      return;
     }
+
+    // Obtener información necesaria
+    const publicKey = freighterService.publicKey;
+    const networkDetails = freighterService.networkDetails;
+    
+    if (!publicKey || !networkDetails) {
+      throw new Error("No se pudo obtener la información de la wallet");
+    }
+
+    console.log('📋 Preparando transacción con:', {
+      network: networkDetails.network,
+      publicKey: `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}`,
+      contractId: CONTRACT_ID,
+      method,
+      args
+    });
+
+    // TODO: Implementar llamada al contrato Soroban
+    // Por ahora, esto es un placeholder
+    console.log('⚠️ La integración con el contrato Soroban está pendiente');
+    alert('La funcionalidad de contratos está en desarrollo. Tu wallet está conectada correctamente.');
+
+    /* 
+    // Ejemplo de cómo se vería la integración completa:
+    const transactionXDR = await freighterApi.getTransaction({
+      network: networkDetails.network,
+      source: publicKey,
+      contractId: CONTRACT_ID,
+      method,
+      args
+    });
+
+    // Firmar la transacción
+    const { signed, error } = await freighterService.signTransaction(transactionXDR);
+    if (error) {
+      throw new Error(error);
+    }
+
+    // Enviar la transacción
+    console.log('📤 Enviando transacción firmada...');
+    const txResponse = await freighterApi.signAndSubmitTransaction(signed);
+    console.log("✅ Transacción completada:", txResponse);
+    return txResponse;
+    */
+  } catch (err) {
+    console.error("❌ Error en invokeContractFunction:", err);
+    alert(`Error en la transacción: ${err instanceof Error ? err.message : 'Error desconocido'}`);
   }
+}
 
-  document.getElementById('addUserForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-      const formData = new FormData(e.target);
-      const args = {
-        user_id: formData.get('user_id'),
-        first_name: formData.get('first_name'),
-        paternal_last_name: formData.get('paternal_last_name'),
-        maternal_last_name: formData.get('maternal_last_name'),
-        phone: formData.get('phone'),
-        email: formData.get('email')
-      };
-      await invokeContractFunction('registrar_usuario', args);
-    } catch (error) {
-      console.error("Error en formulario:", error);
+// Exponer función globalmente para testing
+(window as any).invokeContractFunction = invokeContractFunction;
+
+// Inicializar la conexión al cargar la página
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 Inicializando CenVote DApp...');
+  
+  // Verificar si hay una sesión de wallet guardada
+  const isConnected = await freighterService.checkConnection();
+  if (isConnected && freighterService.publicKey) {
+    console.log('✅ Wallet ya conectada:', `${freighterService.publicKey.slice(0, 6)}...${freighterService.publicKey.slice(-6)}`);
+    
+    // Intentar reconectar automáticamente
+    const result = await freighterService.connect();
+    if (result.success) {
+      console.log('✅ Reconexión automática exitosa');
+    } else {
+      console.log('⚠️ No se pudo reconectar automáticamente:', result.message);
     }
-  });
-
-  window.conectarWallet = conectarWallet;
-  window.invokeContractFunction = invokeContractFunction;
+  } else {
+    console.log('ℹ️ No hay wallet conectada. Por favor conecta tu Freighter wallet.');
+  }
+});
 </script>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-</body>
+</Layout>
