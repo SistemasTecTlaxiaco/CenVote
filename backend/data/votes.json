@@ -5,5 +5,19 @@
     "voterAddress": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT",
     "timestamp": "2026-05-21T03:32:38.379Z",
     "_id": "votes-1779334358379"
+  },
+  {
+    "surveyId": "survey-1779333638643",
+    "candidateId": "candidate-1779219125591",
+    "voterAddress": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT",
+    "timestamp": "2026-05-21T20:45:40.726Z",
+    "_id": "votes-1779396340726"
+  },
+  {
+    "surveyId": "survey-1779396722011",
+    "candidateId": "candidate-1779396646497",
+    "voterAddress": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT",
+    "timestamp": "2026-05-21T20:52:51.331Z",
+    "_id": "votes-1779396771331"
   }
 ]

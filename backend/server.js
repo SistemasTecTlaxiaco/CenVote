@@ -14,6 +14,7 @@ import Survey from './models/Survey.js';
 import Vote from './models/Vote.js';
 import Session from './models/Session.js';
 import Credential from './models/Credential.js';
+import { hashPassword, verifyPassword, generateToken, removeToken, requireAuth, requireAdmin, seedAdmin } from './auth.js';
 
 dotenv.config();
 
@@ -22,6 +23,135 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// ===== AUTH ENDPOINTS =====
+
+// Registro de usuario normal
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { first_name, paternal_last_name, maternal_last_name, email, password, phone } = req.body;
+    if (!first_name || !email || !password) {
+      return res.status(400).json({ error: 'Nombre, email y contraseña son requeridos' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+    }
+    const existing = User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ error: 'Ya existe un usuario con ese email' });
+    }
+    const hashedPw = await hashPassword(password);
+    const userId = `user-${Date.now()}`;
+    const user = User.create({
+      _id: userId,
+      first_name,
+      paternal_last_name: paternal_last_name || '',
+      maternal_last_name: maternal_last_name || '',
+      phone: phone || '',
+      email,
+      password: hashedPw,
+      role: 'user',
+      wallet_address: null,
+      created_at: new Date().toISOString()
+    });
+    const token = generateToken(userId);
+    const { password: _, ...safeUser } = user;
+    res.status(201).json({ token, user: safeUser });
+  } catch (error) {
+    console.error('Error in register:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+    }
+    let user = User.findOne({ email });
+    if (!user) {
+      // Registrar usuario nuevo automáticamente
+      const hashedPw = await hashPassword(password);
+      const userId = `user-${Date.now()}`;
+      user = User.create({
+        _id: userId,
+        first_name: email.split('@')[0],
+        paternal_last_name: '',
+        maternal_last_name: '',
+        phone: '',
+        email,
+        password: hashedPw,
+        role: 'user',
+        wallet_address: null,
+        created_at: new Date().toISOString()
+      });
+      const token = generateToken(user._id);
+      const { password: _, ...safeUser } = user;
+      console.log(`✨ Usuario nuevo autocreado para passkey/login: ${email}`);
+      return res.json({ token, user: safeUser });
+    }
+    
+    // Si el usuario existe pero no tiene contraseña asignada (por ejemplo, importado o passkey-only previo)
+    if (!user.password) {
+      const hashedPw = await hashPassword(password);
+      const updatedUser = User.findByIdAndUpdate(user._id, { password: hashedPw }, { new: true });
+      const token = generateToken(updatedUser._id);
+      const { password: _, ...safeUser } = updatedUser;
+      console.log(`🔐 Contraseña asignada automáticamente al usuario legacy: ${email}`);
+      return res.json({ token, user: safeUser });
+    }
+    
+    const valid = await verifyPassword(password, user.password);
+    if (!valid) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+    const token = generateToken(user._id);
+    const { password: _, ...safeUser } = user;
+    res.json({ token, user: safeUser });
+  } catch (error) {
+    console.error('Error in login:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Obtener usuario autenticado
+app.get('/api/auth/me', requireAuth, (req, res) => {
+  const { password, ...safeUser } = req.user;
+  res.json(safeUser);
+});
+
+// Actualizar perfil
+app.put('/api/auth/profile', requireAuth, async (req, res) => {
+  try {
+    const { first_name, paternal_last_name, maternal_last_name, phone, email } = req.body;
+    const updates = {};
+    if (first_name !== undefined) updates.first_name = first_name;
+    if (paternal_last_name !== undefined) updates.paternal_last_name = paternal_last_name;
+    if (maternal_last_name !== undefined) updates.maternal_last_name = maternal_last_name;
+    if (phone !== undefined) updates.phone = phone;
+    if (email !== undefined) {
+      const existing = User.findOne({ email });
+      if (existing && existing._id !== req.user._id) {
+        return res.status(400).json({ error: 'Ese email ya está en uso por otro usuario' });
+      }
+      updates.email = email;
+    }
+    const updated = User.findByIdAndUpdate(req.user._id, updates, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Usuario no encontrado' });
+    const { password, ...safeUser } = updated;
+    res.json(safeUser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Logout
+app.post('/api/auth/logout', requireAuth, (req, res) => {
+  removeToken(req.token);
+  res.json({ success: true });
+});
 
 // ===== PASSKEY/WEBAUTHN ENDPOINTS =====
 
@@ -74,38 +204,57 @@ app.post('/api/passkey/register/verify', async (req, res) => {
       return res.status(400).json({ error: 'Sesión inválida o expirada' });
     }
 
-    // Guardar credencial
+    // Verificar si la credencial ya existe para evitar duplicados
+    const existingCred = await Credential.findOne({ credentialId });
+    if (existingCred) {
+      await Session.deleteOne({ sessionId });
+      return res.status(400).json({ error: 'Esta passkey ya está registrada en el sistema' });
+    }
+
+    // Buscar usuario existente (por email / username)
+    let user = await User.findOne({ email: username }) || await User.findOne({ username });
+
+    if (!user) {
+      // Solo crear usuario minimal si no existe (passkey-only users)
+      user = await User.findOneAndUpdate(
+        { username },
+        {
+          _id: session.userId,
+          username,
+          email: username, // Asumimos que username es el email
+          displayName,
+          first_name: displayName || username,
+          paternal_last_name: '',
+          maternal_last_name: '',
+          phone: '',
+          role: 'user',
+          wallet_address: null,
+          created_at: new Date().toISOString()
+        },
+        { upsert: true, new: true }
+      );
+    }
+
+    // Guardar credencial usando el ID real del usuario en la BD
     const credKey = `${username}-${credentialId.substring(0, 20)}`;
     await Credential.create({
       credKey,
-      userId: session.userId,
+      userId: user._id,
       credentialId,
       publicKey,
       username,
-      displayName
+      displayName,
+      created_at: new Date().toISOString()
     });
-
-    // Crear o actualizar usuario
-    await User.findOneAndUpdate(
-      { username },
-      {
-        _id: session.userId,
-        username,
-        displayName,
-        wallet_address: session.userId,
-        created_at: new Date()
-      },
-      { upsert: true, new: true }
-    );
 
     // Limpiar sesión
     await Session.deleteOne({ sessionId });
 
     res.json({
       success: true,
-      userId: session.userId,
-      username,
-      displayName,
+      userId: user._id || session.userId,
+      username: user.username || user.email || username,
+      displayName: user.first_name || displayName,
       message: 'Passkey registrado exitosamente'
     });
   } catch (error) {
@@ -113,6 +262,7 @@ app.post('/api/passkey/register/verify', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Generar challenge para autenticación
 app.post('/api/passkey/authenticate/options', async (req, res) => {
@@ -149,14 +299,20 @@ app.post('/api/passkey/authenticate/verify', async (req, res) => {
       return res.status(400).json({ error: 'Sesión inválida o expirada' });
     }
 
-    // Buscar credencial
-    const credential = await Credential.findOne({ username, credentialId });
+    // Buscar credencial (soporta búsqueda por credentialId únicamente si no hay username)
+    const credential = username 
+      ? await Credential.findOne({ username, credentialId })
+      : await Credential.findOne({ credentialId });
+      
     if (!credential) {
       return res.status(401).json({ error: 'Credencial no encontrada' });
     }
 
-    // Buscar usuario
-    const user = await User.findOne({ username });
+    // Buscar usuario (probamos email, username e ID para máxima robustez)
+    const user = await User.findOne({ email: credential.username }) || 
+                 await User.findOne({ username: credential.username }) || 
+                 await User.findById(credential.userId);
+                 
     if (!user) {
       return res.status(401).json({ error: 'Usuario no encontrado' });
     }
@@ -164,19 +320,52 @@ app.post('/api/passkey/authenticate/verify', async (req, res) => {
     // Limpiar sesión
     await Session.deleteOne({ sessionId });
 
-    // Crear token de sesión
-    const authToken = crypto.randomBytes(32).toString('hex');
+    // Crear token de sesión usando el sistema de AuthService del backend
+    const authToken = generateToken(user._id);
+
+    const { password: _, ...safeUser } = user;
 
     res.json({
       success: true,
       authToken,
+      token: authToken, // Para compatibilidad
+      user: safeUser,
       userId: user._id,
-      username: user.username,
-      displayName: user.displayName,
+      username: user.username || user.email || user.first_name,
+      displayName: user.displayName || user.first_name,
       message: '¡Autenticación exitosa!'
     });
   } catch (error) {
     console.error('Error in authenticate/verify:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Listar credenciales de un usuario
+app.get('/api/passkey/list/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const credentials = await Credential.find({ username });
+    const mapped = credentials.map(c => ({
+      ...c,
+      id: c._id
+    }));
+    res.json(mapped);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Eliminar una credencial
+app.delete('/api/passkey/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Credential.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Credencial no encontrada' });
+    }
+    res.json({ success: true, message: 'Credencial eliminada exitosamente' });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
@@ -480,7 +669,7 @@ app.get('/api/debug', async (req, res) => {
 
 // ===== START SERVER =====
 const __filename = fileURLToPath(import.meta.url);
-if (process.argv[1] === __filename) {
+if (process.argv[1] === __filename) { (async () => {
   const PORT = process.env.PORT || 3000;
   const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
   
@@ -489,6 +678,9 @@ if (process.argv[1] === __filename) {
   const keyPath = path.resolve(__dirname, '../key.pem');
   
   // 1. Siempre iniciar el servidor HTTP en el puerto base (3000)
+  // Seed admin user
+  await seedAdmin();
+
   app.listen(PORT, () => {
     console.log(`🚀 HTTP Server running on port ${PORT}`);
     console.log(`📁 Using local JSON database (backend/data/)`);
@@ -512,6 +704,6 @@ if (process.argv[1] === __filename) {
       console.error('❌ Failed to start HTTPS Server:', err);
     }
   }
-}
+})(); }
 
 export default app;

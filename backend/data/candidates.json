@@ -12,9 +12,15 @@
     "wallet_address": null
   },
   {
-    "_id": "candidate-1779333516308",
-    "name": "Candidate Test",
-    "rfc": "RFC123456TEST",
-    "wallet_address": "GBTESTWALLETADDRESS1234567890"
+    "_id": "candidate-1779338020475",
+    "name": "Diego Cruz Cruz",
+    "rfc": "diego@gmail.com",
+    "wallet_address": null
+  },
+  {
+    "_id": "candidate-1779396646497",
+    "name": "Pedro Garcia Garcia",
+    "rfc": "pedro@gmail.com",
+    "wallet_address": null
   }
 ]

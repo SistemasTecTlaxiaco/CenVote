@@ -1,0 +1,61 @@
+---
+interface Props {
+  allowedRoles?: ('admin' | 'user')[];
+}
+
+const { allowedRoles = ['admin', 'user'] } = Astro.props;
+---
+
+<!-- Elemento invisible para transferir props al script cliente -->
+<div id="auth-guard-meta" data-roles={JSON.stringify(allowedRoles)} class="hidden"></div>
+
+<style is:global>
+  html.auth-loading {
+    visibility: hidden !important;
+    background-color: #020617 !important; /* slate-950 fallback para evitar parpadeo blanco */
+  }
+</style>
+
+<script>
+  // Añadir la clase de bloqueo inmediatamente antes del renderizado completo
+  document.documentElement.classList.add('auth-loading');
+</script>
+
+<script>
+  import { authService } from '../services/AuthService';
+
+  function checkAuth() {
+    const metaEl = document.getElementById('auth-guard-meta');
+    if (!metaEl) {
+      document.documentElement.classList.remove('auth-loading');
+      return;
+    }
+
+    const allowedRoles = JSON.parse(metaEl.getAttribute('data-roles') || '[]');
+
+    // Verificar si está autenticado
+    if (!authService.isAuthenticated()) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const user = authService.getUser();
+    
+    // Si no coincide el rol, redirigir según el rol del usuario
+    if (!user || !allowedRoles.includes(user.role)) {
+      console.warn('Acceso denegado para el rol:', user ? user.role : 'invitado');
+      if (user && user.role === 'admin') {
+        window.location.href = '/';
+      } else {
+        window.location.href = '/dashboard';
+      }
+      return;
+    }
+
+    // Autenticación correcta: revelar la página
+    document.documentElement.classList.remove('auth-loading');
+  }
+
+  // Ejecutar verificación de autenticación
+  checkAuth();
+</script>

@@ -1,6 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/AuthGuard.astro';
 ---
+
+<AuthGuard allowedRoles={['admin']} />
 
 <Layout title="Gestión de Usuarios - CenVote">
   <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
@@ -242,12 +245,18 @@ import Layout from '../../layouts/Layout.astro';
   });
 
   // Event Listeners
-  document.addEventListener('DOMContentLoaded', async () => {
-    document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+  function initUsers() {
+    document.getElementById('cancelBtn')?.addEventListener('click', cancelEdit);
     
     // Cargar usuarios
     loadUsers();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUsers);
+  } else {
+    initUsers();
+  }
 
   // Hacer funciones globales
   window.editUser = editUser;

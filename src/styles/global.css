@@ -118,3 +118,71 @@
 .animate-glow {
   animation: glow 2s ease-in-out infinite;
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* ===== RESPONSIVE MOBILE ENHANCEMENTS ===== */
+
+/* Mejor touch target para botones en móvil */
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-accent {
+    @apply py-3 text-sm;
+    min-height: 44px;
+  }
+
+  .input-modern {
+    @apply py-3 text-base;
+    min-height: 44px;
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+
+  /* Headings escalados para móvil */
+  h1 {
+    font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: clamp(1.25rem, 5vw, 2rem) !important;
+  }
+
+  h3 {
+    font-size: clamp(1rem, 4vw, 1.5rem) !important;
+  }
+
+  /* Tablas scrolleables en móvil */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Padding más compacto en tarjetas */
+  .card-glass,
+  .card-gradient {
+    @apply p-4;
+  }
+}
+
+/* Pantallas muy pequeñas (< 480px) */
+@media (max-width: 480px) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-accent {
+    @apply w-full text-center;
+  }
+}
+
+/* Safe area para dispositivos con notch */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

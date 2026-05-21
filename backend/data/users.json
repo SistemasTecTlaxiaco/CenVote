@@ -25,5 +25,59 @@
     "phone": "1234567890",
     "email": "testuser@example.com",
     "wallet_address": "GBTESTWALLETADDRESS1234567890"
+  },
+  {
+    "_id": "user-1779337155994",
+    "first_name": "Pedro",
+    "paternal_last_name": "Garcia",
+    "maternal_last_name": "Garcia",
+    "phone": "9531235467",
+    "email": "pedro@gmail.com",
+    "wallet_address": null
+  },
+  {
+    "_id": "user-1779337994276",
+    "first_name": "Diego",
+    "paternal_last_name": "Cruz",
+    "maternal_last_name": "Cruz",
+    "phone": "9531789876",
+    "email": "diego@gmail.com",
+    "wallet_address": null
+  },
+  {
+    "_id": "user-admin-1779391687083",
+    "first_name": "Admin",
+    "paternal_last_name": "CenVote",
+    "maternal_last_name": "",
+    "phone": "",
+    "email": "admin@cenvote.com",
+    "password": "31056ccd92c6305f5d5379077868b992:b03bfe44209cd0588a77ccfeb034190b9724ed146f663ecac6f7f5d4eda76f167ba1137bc97582ee8b9fa1369a6bc1463db8cb0e33e290f06842c957fd92ae3d",
+    "role": "admin",
+    "wallet_address": null,
+    "created_at": "2026-05-21T19:28:07.083Z"
+  },
+  {
+    "_id": "user-1779392523815",
+    "first_name": "Marco",
+    "paternal_last_name": "Rosas",
+    "maternal_last_name": "Garcia",
+    "phone": "9531643574",
+    "email": "rosasmarcouriel@gmail.com",
+    "password": "1cc7d1e5c449d25b64fb09a941b8f6ec:7efa2bb29ad6891c8689cab7d9c0aaac19d66ee28cd494a9c5aede48f4aa75bfb18aec01e249624582bf6f22c6fbfcb394f83cead39d8a65f1df3dfed84c1f50",
+    "role": "user",
+    "wallet_address": null,
+    "created_at": "2026-05-21T19:42:03.815Z"
+  },
+  {
+    "_id": "user-1779392973201",
+    "first_name": "irvin.sanchez.dev",
+    "paternal_last_name": "",
+    "maternal_last_name": "",
+    "phone": "",
+    "email": "irvin.sanchez.dev@gmail.com",
+    "password": "535c0ba41412ea6e0135f84dc59853a8:b13fefff5c179d401d03ccb3b7e56bb52ffbd7a5f755e8a12af417e6b3ad2881010bef47c88429ade8ebc2aec8cb89859bbdffa46d42211a970faf4467eae10c",
+    "role": "user",
+    "wallet_address": null,
+    "created_at": "2026-05-21T19:49:33.201Z"
   }
 ]

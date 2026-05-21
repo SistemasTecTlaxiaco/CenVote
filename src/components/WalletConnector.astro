@@ -185,16 +185,23 @@ function copyAddressToClipboard(): void {
 }
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', async () => {
+async function initWallet() {
   console.log('🔄 Verificando conexión existente...');
-  
   const isConnected = await freighterService.checkConnection();
   if (isConnected && freighterService.publicKey) {
     const networkDetails = freighterService.networkDetails;
     await updateUI(true, freighterService.publicKey, networkDetails?.network);
     console.log('✅ Reconectado automáticamente');
+  } else {
+    await updateUI(false);
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initWallet);
+} else {
+  initWallet();
+}
 
 connectButton?.addEventListener('click', handleConnect);
 disconnectButton?.addEventListener('click', handleDisconnect);

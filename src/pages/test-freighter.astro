@@ -190,9 +190,15 @@ checkBtn?.addEventListener('click', handleCheck);
 balanceBtn?.addEventListener('click', handleBalance);
 
 // Verificación inicial
-document.addEventListener('DOMContentLoaded', async () => {
+async function initTestPage() {
   log('Página de test cargada');
   log(`Cuenta esperada: ${freighterService.expectedPublicKey}`);
   await handleCheck();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTestPage);
+} else {
+  initTestPage();
+}
 </script>

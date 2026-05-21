@@ -1,6 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/AuthGuard.astro';
 ---
+
+<AuthGuard allowedRoles={['admin']} />
 
 <Layout title="Gestión de Encuestas - CenVote">
   <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
@@ -949,9 +952,9 @@ import Layout from '../../layouts/Layout.astro';
   });
 
   // Event Listeners
-  document.addEventListener('DOMContentLoaded', async () => {
-    document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
-    document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+  async function initSurveys() {
+    document.getElementById('connectWalletBtn')?.addEventListener('click', connectWallet);
+    document.getElementById('cancelBtn')?.addEventListener('click', cancelEdit);
     
     // Auto-detectar wallet al cargar
     await autoDetectWallet();
@@ -961,7 +964,13 @@ import Layout from '../../layouts/Layout.astro';
     
     // Validar el formulario inicial
     validateForm();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSurveys);
+  } else {
+    initSurveys();
+  }
 
   // Hacer funciones globales
   window.editSurvey = editSurvey;

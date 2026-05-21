@@ -1,0 +1,381 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Iniciar Sesión - CenVote" hideSidebar={true}>
+  <!-- Redirigir si ya tiene sesión -->
+  <script>
+    import { authService } from '../../services/AuthService';
+    if (authService.isAuthenticated()) {
+      const user = authService.getUser();
+      if (user) window.location.href = user.role === 'admin' ? '/' : '/dashboard';
+    }
+  </script>
+
+  <div class="min-h-screen flex items-center justify-center py-8 px-4 bg-slate-950 relative overflow-hidden">
+    <!-- Fondo difuso -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-purple-600/25 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse pointer-events-none" style="animation-delay:2s"></div>
+
+    <div class="max-w-md w-full space-y-6 relative z-10">
+      <!-- Logo y título -->
+      <div class="text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-500 via-purple-700 to-blue-600 shadow-xl shadow-purple-500/30 mb-4">
+          <span class="text-4xl">🗳️</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-black bg-gradient-to-r from-white via-gray-100 to-purple-200 bg-clip-text text-transparent tracking-tight">
+          CenVote
+        </h1>
+        <p class="mt-1 text-sm text-gray-400">Plataforma de Votación Democrática Descentralizada</p>
+      </div>
+
+      <!-- Alerta de estado -->
+      <div id="authAlert" class="hidden p-4 rounded-xl border text-xs font-medium flex items-start gap-2" role="alert">
+        <span id="authAlertIcon">⚠️</span>
+        <span id="authAlertText" class="flex-1">Error</span>
+      </div>
+
+      <!-- Tabs principales -->
+      <div class="card-glass backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl bg-white/5">
+        <!-- Selector de pestañas -->
+        <div class="flex bg-black/35 p-1 rounded-2xl mb-6 border border-white/5 text-xs">
+          <button id="tab-login-btn" class="tab-btn tab-active flex-1 py-2.5 rounded-xl font-bold transition-all duration-300">
+            🔑 Ingresar
+          </button>
+          <button id="tab-register-btn" class="tab-btn flex-1 py-2.5 rounded-xl font-semibold transition-all duration-300 text-gray-400 hover:text-white">
+            ✨ Crear Cuenta
+          </button>
+        </div>
+
+        <!-- ===== PANEL INGRESAR ===== -->
+        <div id="login-panel">
+
+          <!-- 1. PASSKEY BIOMÉTRICO (si ya tiene uno) -->
+          <div class="mb-5">
+            <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-3">Acceso Rápido (Biométrico)</p>
+            <button id="passkey-login-btn"
+              class="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 hover:from-indigo-600 hover:via-purple-700 hover:to-pink-700 text-white font-extrabold shadow-xl shadow-purple-600/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+              <span class="text-2xl">📱</span>
+              <span>Entrar con Passkey</span>
+            </button>
+            <p class="text-center text-[10px] text-gray-500 mt-2">Usa tu huella, Face ID o Windows Hello</p>
+          </div>
+
+          <!-- 2. CREAR NUEVA PASSKEY (primer uso) -->
+          <div class="mb-5">
+            <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-3">¿Primera vez con Passkey?</p>
+            <div class="p-4 rounded-2xl bg-white/5 border border-purple-400/20 space-y-3">
+              <p class="text-xs text-gray-300">Crea una llave biométrica para iniciar sesión sin contraseña. Necesitas tener una cuenta o ingresa tu email para crear una.</p>
+              <div class="space-y-2">
+                <input type="email" id="pk-email" placeholder="tu@correo.com" class="input-modern text-sm py-2.5">
+                <input type="password" id="pk-password" placeholder="Contraseña (para verificar tu cuenta)" class="input-modern text-sm py-2.5">
+                <input type="text" id="pk-device" placeholder="Nombre del dispositivo (ej: Mi Laptop)" class="input-modern text-sm py-2.5">
+              </div>
+              <button id="create-passkey-btn"
+                class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold text-sm shadow-md transition-all hover:scale-[1.01] active:scale-[0.99]">
+                ⚡ Crear nueva Passkey
+              </button>
+            </div>
+          </div>
+
+          <!-- Separador -->
+          <div class="flex items-center my-5">
+            <div class="flex-1 h-px bg-white/10"></div>
+            <span class="px-3 text-[10px] text-gray-500 font-semibold uppercase tracking-wider">o ingresa con contraseña</span>
+            <div class="flex-1 h-px bg-white/10"></div>
+          </div>
+
+          <!-- 3. FORMULARIO CONTRASEÑA CLÁSICO -->
+          <form id="loginForm" class="space-y-3">
+            <div>
+              <label for="login-email" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Correo</label>
+              <input type="email" id="login-email" name="email" required placeholder="tu@correo.com" class="input-modern">
+            </div>
+            <div>
+              <label for="login-password" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Contraseña</label>
+              <input type="password" id="login-password" name="password" required placeholder="••••••••" class="input-modern">
+            </div>
+            <button type="submit" class="w-full btn-accent py-3 mt-1">
+              Ingresar con Contraseña
+            </button>
+          </form>
+          
+          <!-- Acceso Rápido Administrador -->
+          <div class="mt-4 p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-center">
+            <button type="button" id="quick-admin-login-btn" class="text-xs font-bold text-purple-300 hover:text-purple-200 transition-colors flex items-center justify-center gap-1.5 mx-auto w-full">
+              🛡️ Acceder como Administrador (Pruebas)
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== PANEL CREAR CUENTA ===== -->
+        <div id="register-panel" class="hidden">
+          <form id="registerForm" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="reg-first-name" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nombre *</label>
+                <input type="text" id="reg-first-name" name="first_name" required placeholder="Irvin" class="input-modern">
+              </div>
+              <div>
+                <label for="reg-paternal" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">A. Paterno *</label>
+                <input type="text" id="reg-paternal" name="paternal_last_name" required placeholder="Jiménez" class="input-modern">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="reg-maternal" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">A. Materno</label>
+                <input type="text" id="reg-maternal" name="maternal_last_name" placeholder="Sánchez" class="input-modern">
+              </div>
+              <div>
+                <label for="reg-phone" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Teléfono</label>
+                <input type="tel" id="reg-phone" name="phone" placeholder="9531234567" class="input-modern">
+              </div>
+            </div>
+            <div>
+              <label for="reg-email" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Correo *</label>
+              <input type="email" id="reg-email" name="email" required placeholder="ejemplo@cenvote.com" class="input-modern">
+            </div>
+            <div>
+              <label for="reg-password" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Contraseña *</label>
+              <input type="password" id="reg-password" name="password" required placeholder="Mínimo 6 caracteres" class="input-modern" minlength="6">
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99] mt-1">
+              ✨ Crear Cuenta de Elector
+            </button>
+
+            <div class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <p class="text-[11px] text-blue-300 text-center">
+                💡 Después de registrarte podrás agregar tu passkey biométrica desde tu perfil.
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { authService } from '../../services/AuthService';
+  import { authenticatePasskey, registerPasskey } from '../../services/PasskeyService';
+
+  // ===== HELPERS =====
+  function showAlert(msg: string, isError = true) {
+    const el = document.getElementById('authAlert');
+    const icon = document.getElementById('authAlertIcon');
+    const text = document.getElementById('authAlertText');
+    if (!el || !icon || !text) return;
+    icon.textContent = isError ? '⚠️' : '✓';
+    text.textContent = msg;
+    el.className = isError
+      ? 'p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 text-xs font-medium flex items-start gap-2'
+      : 'p-4 rounded-xl border border-green-500/30 bg-green-500/10 text-green-300 text-xs font-medium flex items-start gap-2';
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 6000);
+  }
+
+  function clearAlert() {
+    document.getElementById('authAlert')?.classList.add('hidden');
+  }
+
+  function setLoading(btn: HTMLButtonElement, loading: boolean, original: string, loadingText: string) {
+    btn.disabled = loading;
+    btn.innerHTML = loading
+      ? `<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-2"></div>${loadingText}`
+      : original;
+  }
+
+  // ===== TABS =====
+  const tabLoginBtn = document.getElementById('tab-login-btn') as HTMLButtonElement;
+  const tabRegisterBtn = document.getElementById('tab-register-btn') as HTMLButtonElement;
+  const loginPanel = document.getElementById('login-panel');
+  const registerPanel = document.getElementById('register-panel');
+
+  function activateTab(isLogin: boolean) {
+    clearAlert();
+    if (isLogin) {
+      tabLoginBtn.className = 'tab-btn tab-active flex-1 py-2.5 rounded-xl font-bold transition-all duration-300';
+      tabRegisterBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-semibold transition-all duration-300 text-gray-400 hover:text-white';
+      loginPanel?.classList.remove('hidden');
+      registerPanel?.classList.add('hidden');
+    } else {
+      tabRegisterBtn.className = 'tab-btn tab-active flex-1 py-2.5 rounded-xl font-bold transition-all duration-300';
+      tabLoginBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-semibold transition-all duration-300 text-gray-400 hover:text-white';
+      registerPanel?.classList.remove('hidden');
+      loginPanel?.classList.add('hidden');
+    }
+  }
+
+  tabLoginBtn?.addEventListener('click', () => activateTab(true));
+  tabRegisterBtn?.addEventListener('click', () => activateTab(false));
+
+  // ===== AUTENTICAR CON PASSKEY EXISTENTE =====
+  const passkeyLoginBtn = document.getElementById('passkey-login-btn') as HTMLButtonElement;
+  const originalPasskeyText = passkeyLoginBtn?.innerHTML;
+  
+  passkeyLoginBtn?.addEventListener('click', async () => {
+    clearAlert();
+    setLoading(passkeyLoginBtn, true, originalPasskeyText, 'Verificando identidad...');
+    try {
+      await authenticatePasskey();
+      const user = authService.getUser();
+      if (user) {
+        showAlert('✓ ¡Autenticación exitosa! Redirigiendo...', false);
+        setTimeout(() => {
+          window.location.href = user.role === 'admin' ? '/' : '/dashboard';
+        }, 500);
+      } else {
+        throw new Error('No se pudo recuperar la sesión del usuario');
+      }
+    } catch (err: any) {
+      let msg = err.message || 'Error de autenticación';
+      // Mensajes amigables
+      if (msg.includes('Credencial no encontrada') || msg.includes('not found')) {
+        msg = 'No tienes passkeys registradas. Usa la opción "Crear nueva Passkey" con tu correo y contraseña, o ingresa con contraseña primero.';
+      } else if (msg.includes('cancelled') || msg.includes('cancelada') || msg.includes('NotAllowedError')) {
+        msg = 'Autenticación cancelada por el usuario.';
+      }
+      showAlert(msg);
+    } finally {
+      setLoading(passkeyLoginBtn, false, originalPasskeyText, '');
+    }
+  });
+
+  // ===== CREAR NUEVA PASSKEY =====
+  const createPasskeyBtn = document.getElementById('create-passkey-btn') as HTMLButtonElement;
+  const originalCreateText = createPasskeyBtn?.innerHTML;
+
+  createPasskeyBtn?.addEventListener('click', async () => {
+    clearAlert();
+    const emailInput = document.getElementById('pk-email') as HTMLInputElement;
+    const passwordInput = document.getElementById('pk-password') as HTMLInputElement;
+    const deviceInput = document.getElementById('pk-device') as HTMLInputElement;
+
+    const email = emailInput?.value.trim();
+    const password = passwordInput?.value;
+    const deviceName = deviceInput?.value.trim() || 'Mi Dispositivo';
+
+    if (!email) { showAlert('Ingresa tu correo electrónico.'); return; }
+    if (!password) { showAlert('Ingresa tu contraseña para verificar tu cuenta.'); return; }
+
+    setLoading(createPasskeyBtn, true, originalCreateText, 'Verificando cuenta...');
+
+    try {
+      // 1. Verificar credenciales primero
+      const loginResult = await authService.login(email, password);
+      if (!loginResult.success || !loginResult.user) {
+        throw new Error(loginResult.message || 'Correo o contraseña incorrectos');
+      }
+
+      // 2. Registrar passkey para este usuario
+      setLoading(createPasskeyBtn, true, originalCreateText, 'Activando biometría...');
+      await registerPasskey({
+        name: email,
+        displayName: loginResult.user.first_name || email,
+        deviceName: deviceName
+      });
+
+      showAlert(`✓ ¡Passkey creada para ${deviceName}! Ahora puedes usar el botón "Entrar con Passkey".`, false);
+      emailInput.value = '';
+      passwordInput.value = '';
+      deviceInput.value = '';
+
+      // 3. Redirigir según rol (ya está autenticado desde el login)
+      setTimeout(() => {
+        window.location.href = loginResult.user!.role === 'admin' ? '/' : '/dashboard';
+      }, 2000);
+
+    } catch (err: any) {
+      let msg = err.message || 'Error al crear la passkey';
+      if (msg.includes('cancelada') || msg.includes('NotAllowedError')) {
+        msg = 'El registro de passkey fue cancelado. Inténtalo de nuevo.';
+      }
+      showAlert(msg);
+    } finally {
+      setLoading(createPasskeyBtn, false, originalCreateText, '');
+    }
+  });
+
+  // ===== LOGIN CONTRASEÑA =====
+  const loginForm = document.getElementById('loginForm');
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAlert();
+    const btn = loginForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const orig = btn.textContent || '';
+    btn.disabled = true;
+    btn.textContent = 'Ingresando...';
+
+    const fd = new FormData(e.target as HTMLFormElement);
+    try {
+      const result = await authService.login(fd.get('email') as string, fd.get('password') as string);
+      if (result.success && result.user) {
+        window.location.href = result.user.role === 'admin' ? '/' : '/dashboard';
+      } else {
+        showAlert(result.message);
+      }
+    } catch {
+      showAlert('Error de conexión con el servidor.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+  });
+
+  // ===== ACCESO RÁPIDO ADMINISTRADOR =====
+  const quickAdminBtn = document.getElementById('quick-admin-login-btn');
+  quickAdminBtn?.addEventListener('click', () => {
+    const emailInput = document.getElementById('login-email') as HTMLInputElement;
+    const passwordInput = document.getElementById('login-password') as HTMLInputElement;
+    if (emailInput && passwordInput && loginForm) {
+      emailInput.value = 'admin@cenvote.com';
+      passwordInput.value = 'admin123';
+      
+      // Enviar el formulario directamente
+      const submitEvent = new Event('submit', { cancelable: true });
+      loginForm.dispatchEvent(submitEvent);
+    }
+  });
+
+  // ===== REGISTRO DE NUEVA CUENTA =====
+  const registerForm = document.getElementById('registerForm');
+  registerForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAlert();
+    const btn = registerForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const orig = btn.textContent || '';
+    btn.disabled = true;
+    btn.textContent = 'Creando cuenta...';
+
+    const fd = new FormData(e.target as HTMLFormElement);
+    try {
+      const result = await authService.register({
+        first_name: fd.get('first_name') as string,
+        paternal_last_name: fd.get('paternal_last_name') as string,
+        maternal_last_name: fd.get('maternal_last_name') as string,
+        phone: fd.get('phone') as string,
+        email: fd.get('email') as string,
+        password: fd.get('password') as string,
+      });
+      if (result.success && result.user) {
+        window.location.href = '/dashboard';
+      } else {
+        showAlert(result.message);
+      }
+    } catch {
+      showAlert('Error de conexión con el servidor.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+  });
+</script>
+
+<style>
+  .tab-active {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: white;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  }
+</style>

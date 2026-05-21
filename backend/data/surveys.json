@@ -48,5 +48,20 @@
     ],
     "created_by": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT",
     "creation_tx_hash": "edc3975114601fdbc39acc1d02369a9a33f9fc617ad34449db855d4196a30e21"
+  },
+  {
+    "_id": "survey-1779396722011",
+    "name": "PRESIDENCIA MUNICIPAL DE TLAXIACO OAXA",
+    "description": "VOTA POR TU PRESIDENTEEEE",
+    "start_date": "2026-05-21T14:51",
+    "end_date": "2026-05-23T14:51",
+    "candidates": [
+      "candidate-1779396646497",
+      "candidate-1779338020475",
+      "candidate-1779219125591",
+      "candidate-1779219129434"
+    ],
+    "created_by": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT",
+    "creation_tx_hash": "0b0eaf2e372418459e68e5e67394cb3d8e0293dc0f447276e819d88e33018eaf"
   }
 ]

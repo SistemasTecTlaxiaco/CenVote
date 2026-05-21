@@ -1,0 +1,404 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/AuthGuard.astro';
+---
+
+<!-- Permitir acceso tanto a admins como a usuarios estándar -->
+<AuthGuard allowedRoles={['admin', 'user']} />
+
+<Layout title="Mi Perfil - CenVote">
+  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto space-y-8">
+      
+      <!-- Título de la página -->
+      <div>
+        <h1 class="text-4xl font-black bg-gradient-to-r from-white via-gray-100 to-purple-200 bg-clip-text text-transparent mb-2">
+          👤 Mi Perfil de Usuario
+        </h1>
+        <p class="text-gray-400">
+          Gestiona tus datos personales y configura la seguridad biométrica de tu cuenta.
+        </p>
+      </div>
+
+      <!-- Alertas de estado -->
+      <div id="profileAlert" class="hidden p-4 rounded-xl border-2 transition-all duration-300 text-sm" role="alert"></div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
+        <!-- Panel Izquierdo: Información general y Wallet -->
+        <div class="md:col-span-1 space-y-6">
+          <div class="card-glass backdrop-blur-lg p-6 rounded-3xl border border-white/10 bg-white/5 text-center">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 via-purple-700 to-blue-500 flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4" id="avatar-display">
+              U
+            </div>
+            <h3 class="text-xl font-bold text-white truncate" id="name-display">Usuario</h3>
+            <p class="text-xs text-purple-300 capitalize font-semibold mt-1" id="role-display">Elector</p>
+            
+            <div class="mt-6 border-t border-white/10 pt-6 text-left space-y-4">
+              <div>
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Correo Electrónico</p>
+                <p class="text-xs text-gray-300 truncate" id="email-display">correo@cenvote.com</p>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Miembro Desde</p>
+                <p class="text-xs text-gray-300" id="date-display">--/--/----</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información de Stellar Wallet -->
+          <div class="card-glass backdrop-blur-lg p-6 rounded-3xl border border-white/10 bg-white/5">
+            <h4 class="text-xs font-bold text-purple-300 uppercase tracking-wider mb-3">Cartera Stellar</h4>
+            <div class="space-y-2">
+              <div class="p-3 bg-black/40 rounded-xl border border-white/5">
+                <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Clave Pública (Freighter)</p>
+                <p class="text-xs text-white font-mono truncate" id="wallet-display">No vinculada</p>
+              </div>
+              <p class="text-[10px] text-gray-500">Conecta tu wallet en el panel de navegación para firmar tus votos en la blockchain.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Derecho: Edición y Configuración de Passkeys -->
+        <div class="md:col-span-2 space-y-8">
+          
+          <!-- Formulario de Edición de Perfil -->
+          <div class="card-glass backdrop-blur-lg p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5">
+            <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              📝 Editar Datos Personales
+            </h3>
+            
+            <form id="profileForm" class="space-y-6">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div>
+                  <label for="first_name" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Nombre</label>
+                  <input type="text" id="first_name" name="first_name" required class="input-modern">
+                </div>
+                <div>
+                  <label for="paternal_last_name" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">A. Paterno</label>
+                  <input type="text" id="paternal_last_name" name="paternal_last_name" required class="input-modern">
+                </div>
+                <div>
+                  <label for="maternal_last_name" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">A. Materno</label>
+                  <input type="text" id="maternal_last_name" name="maternal_last_name" class="input-modern">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label for="phone" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Teléfono</label>
+                  <input type="tel" id="phone" name="phone" class="input-modern">
+                </div>
+                <div>
+                  <label for="email" class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Correo Electrónico (No modificable)</label>
+                  <input type="email" id="email" name="email" disabled class="input-modern opacity-60 cursor-not-allowed">
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-4">
+                <button type="submit" class="btn-accent px-6 py-2.5">
+                  💾 Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Panel de Administración de Passkeys -->
+          <div class="card-glass backdrop-blur-lg p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+              <div>
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                  📱 Seguridad Biométrica (Passkeys)
+                </h3>
+                <p class="text-xs text-gray-400 mt-1">
+                  Administra las llaves de seguridad asociadas a tu cuenta.
+                </p>
+              </div>
+              <button id="add-passkey-toggle" class="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition-all flex items-center gap-1.5 self-start sm:self-center">
+                ➕ Agregar Llave
+              </button>
+            </div>
+
+            <!-- Formulario para agregar Passkey (oculto por defecto) -->
+            <div id="add-passkey-form" class="hidden p-4 rounded-2xl bg-white/5 border border-white/10 space-y-4 animate-fadeIn">
+              <h4 class="text-sm font-bold text-white">Vincular Nuevo Dispositivo</h4>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="deviceName" placeholder="ej: Mi Teléfono Android, Windows Hello" class="input-modern text-sm py-2 flex-1">
+                <button id="btn-register-passkey" class="btn-accent px-4 py-2.5 text-xs whitespace-nowrap">
+                  ⚡ Registrar Passkey
+                </button>
+              </div>
+              <p class="text-[10px] text-gray-400">Esta acción solicitará a tu navegador crear una credencial WebAuthn vinculada a tus datos biométricos.</p>
+            </div>
+
+            <!-- Lista de Passkeys -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-purple-300 uppercase tracking-wider">Dispositivos Vinculados</h4>
+              
+              <ul id="passkeyList" class="space-y-3">
+                <li class="text-center py-6 text-xs text-gray-400">
+                  Cargando tus llaves registradas...
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { authService } from '../../services/AuthService';
+  import { freighterService } from '../../services/FreighterService';
+  import { registerPasskey } from '../../services/PasskeyService';
+
+  const API_URL = (typeof import.meta !== 'undefined' && typeof import.meta.env !== 'undefined' && import.meta.env.PUBLIC_API_URL) || (typeof window !== 'undefined' ? (window.location.protocol === 'https:' ? 'https://' + window.location.hostname + ':3001' : 'http://' + window.location.hostname + ':3000') : 'http://localhost:3000');
+
+  // Mostrar alerta
+  function showAlert(message: string, isError: boolean = false) {
+    const alertEl = document.getElementById('profileAlert');
+    if (!alertEl) return;
+    
+    alertEl.className = isError 
+      ? 'p-4 rounded-xl border-2 bg-red-500/10 border-red-500/30 text-red-300 text-sm mb-6'
+      : 'p-4 rounded-xl border-2 bg-green-500/10 border-green-500/30 text-green-300 text-sm mb-6';
+      
+    alertEl.innerHTML = `<strong>${isError ? '⚠️ Error:' : '✓ Éxito:'}</strong> ${message}`;
+    alertEl.classList.remove('hidden');
+    alertEl.scrollIntoView({ behavior: 'smooth' });
+    
+    setTimeout(() => {
+      alertEl.classList.add('hidden');
+    }, 5000);
+  }
+
+  // Cargar información de perfil
+  function loadProfileInfo() {
+    const user = authService.getUser();
+    if (!user) return;
+
+    // Llenar datos estáticos
+    const displayName = user.first_name || user.email || 'Usuario';
+    const avatarEl = document.getElementById('avatar-display');
+    const nameEl = document.getElementById('name-display');
+    const roleEl = document.getElementById('role-display');
+    const emailEl = document.getElementById('email-display');
+    const dateEl = document.getElementById('date-display');
+
+    if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
+    if (nameEl) nameEl.textContent = displayName + (user.paternal_last_name ? ' ' + user.paternal_last_name : '');
+    if (roleEl) roleEl.textContent = user.role === 'admin' ? '🛡️ Administrador' : '🗳️ Elector';
+    if (emailEl) emailEl.textContent = user.email || user.username;
+    
+    if (dateEl && user.created_at) {
+      dateEl.textContent = new Date(user.created_at).toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    // Llenar formulario
+    const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+    const paternalInput = document.getElementById('paternal_last_name') as HTMLInputElement;
+    const maternalInput = document.getElementById('maternal_last_name') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+
+    if (firstNameInput) firstNameInput.value = user.first_name || '';
+    if (paternalInput) paternalInput.value = user.paternal_last_name || '';
+    if (maternalInput) maternalInput.value = user.maternal_last_name || '';
+    if (phoneInput) phoneInput.value = user.phone || '';
+    if (emailInput) emailInput.value = user.email || user.username;
+
+    // Cargar Passkeys
+    loadPasskeys(user.email || user.username);
+  }
+
+  // Cargar Passkeys de la base de datos
+  async function loadPasskeys(username: string) {
+    const listEl = document.getElementById('passkeyList');
+    if (!listEl) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/passkey/list/${username}`);
+      if (!res.ok) throw new Error('Error al listar credentials');
+      
+      const credentials = await res.json();
+      
+      if (credentials.length === 0) {
+        listEl.innerHTML = `
+          <li class="text-center py-6 text-xs text-gray-400 bg-white/5 border border-white/10 rounded-2xl">
+            Aún no has registrado ninguna Passkey. Haz clic en "Agregar Llave" para activar la seguridad biométrica.
+          </li>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = credentials.map(c => {
+        const date = c.created_at ? new Date(c.created_at).toLocaleDateString() : 'Fecha desconocida';
+        const displayName = c.displayName || 'Dispositivo Desconocido';
+        const credIdShort = c.credentialId ? c.credentialId.substring(0, 15) + '...' : 'ID';
+
+        return `
+          <li class="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🔑</span>
+              <div>
+                <p class="text-sm font-bold text-white">${displayName}</p>
+                <p class="text-[10px] text-gray-400 font-mono">ID: ${credIdShort} • Registrada: ${date}</p>
+              </div>
+            </div>
+            <button onclick="window.deletePasskey('${c._id || c.id}')"
+              class="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-2 rounded-xl text-xs font-bold transition-all">
+              🗑️ Eliminar
+            </button>
+          </li>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error(err);
+      listEl.innerHTML = `
+        <li class="text-center py-6 text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-2xl">
+          Error al cargar tus Passkeys del servidor.
+        </li>
+      `;
+    }
+  }
+
+  // Eliminar Passkey
+  async function deletePasskey(id: string) {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta llave de seguridad?\n\nSi eliminas esta llave, no podrás ingresar desde este dispositivo usando biometría hasta que la vuelvas a registrar.')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/passkey/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (res.ok) {
+        showAlert('Llave de seguridad eliminada con éxito');
+        const user = authService.getUser();
+        if (user) loadPasskeys(user.email || user.username);
+      } else {
+        const error = await res.json();
+        throw new Error(error.error || 'Error al eliminar credencial');
+      }
+    } catch (err: any) {
+      showAlert('No se pudo eliminar la passkey: ' + err.message, true);
+    }
+  }
+
+  // Conectar y refrescar dirección wallet
+  async function setupWallet() {
+    const isConnected = await freighterService.checkConnection();
+    const walletEl = document.getElementById('wallet-display');
+    if (walletEl) {
+      walletEl.textContent = isConnected && freighterService.publicKey 
+        ? freighterService.publicKey 
+        : 'No vinculada';
+    }
+  }
+
+  // Escuchar cambios de Freighter
+  window.addEventListener('walletConnected', (event: any) => {
+    const walletEl = document.getElementById('wallet-display');
+    if (walletEl) walletEl.textContent = event.detail.publicKey;
+  });
+
+  window.addEventListener('walletDisconnected', () => {
+    const walletEl = document.getElementById('wallet-display');
+    if (walletEl) walletEl.textContent = 'No vinculada';
+  });
+
+  // Toggle para formulario de agregar passkey
+  const toggleAddBtn = document.getElementById('add-passkey-toggle');
+  const addForm = document.getElementById('add-passkey-form');
+  toggleAddBtn?.addEventListener('click', () => {
+    if (addForm) {
+      addForm.classList.toggle('hidden');
+      toggleAddBtn.textContent = addForm.classList.contains('hidden') ? '➕ Agregar Llave' : '✕ Cancelar';
+    }
+  });
+
+  // Guardar Cambios en Formulario de Perfil
+  const profileForm = document.getElementById('profileForm');
+  profileForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = profileForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Guardando...';
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const updates = {
+      first_name: formData.get('first_name') as string,
+      paternal_last_name: formData.get('paternal_last_name') as string,
+      maternal_last_name: formData.get('maternal_last_name') as string,
+      phone: formData.get('phone') as string
+    };
+
+    try {
+      const result = await authService.updateProfile(updates);
+      if (result.success) {
+        showAlert('Datos personales actualizados con éxito');
+        loadProfileInfo();
+      } else {
+        showAlert(result.message, true);
+      }
+    } catch (err) {
+      showAlert('Error al actualizar tus datos en el servidor', true);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  });
+
+  // Agregar Passkey
+  const btnRegister = document.getElementById('btn-register-passkey');
+  btnRegister?.addEventListener('click', async () => {
+    const deviceInput = document.getElementById('deviceName') as HTMLInputElement;
+    const deviceName = deviceInput.value.trim() || 'Mi Dispositivo';
+    const user = authService.getUser();
+    if (!user) return;
+
+    btnRegister.setAttribute('disabled', 'true');
+    const originalText = btnRegister.textContent;
+    btnRegister.textContent = 'Registrando...';
+
+    try {
+      await registerPasskey({
+        name: user.email || user.username,
+        displayName: user.first_name || user.email,
+        deviceName: deviceName
+      });
+      
+      showAlert('✓ ¡Nueva passkey registrada y asociada correctamente!');
+      deviceInput.value = '';
+      if (addForm) addForm.classList.add('hidden');
+      if (toggleAddBtn) toggleAddBtn.textContent = '➕ Agregar Llave';
+      loadPasskeys(user.email || user.username);
+    } catch (err: any) {
+      showAlert('Error al registrar passkey: ' + err.message, true);
+    } finally {
+      btnRegister.removeAttribute('disabled');
+      btnRegister.textContent = originalText;
+    }
+  });
+
+  // Carga al iniciar
+  function initProfile() {
+    loadProfileInfo();
+    setupWallet();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProfile);
+  } else {
+    initProfile();
+  }
+
+  // Exportar deletePasskey global
+  (window as any).deletePasskey = deletePasskey;
+</script>

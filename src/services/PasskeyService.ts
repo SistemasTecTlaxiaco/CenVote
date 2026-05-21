@@ -1,4 +1,15 @@
-const API_BASE = ((typeof import.meta !== 'undefined' && typeof import.meta.env !== 'undefined' && import.meta.env.PUBLIC_API_URL) || (typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.hostname + ':3000' : 'http://localhost:3000')) + '/api';
+function getApiUrl(): string {
+  if (typeof import.meta !== 'undefined' && typeof import.meta.env !== 'undefined' && import.meta.env.PUBLIC_API_URL) {
+    return import.meta.env.PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    return window.location.protocol === 'https:'
+      ? 'https://' + window.location.hostname + ':3001'
+      : 'http://' + window.location.hostname + ':3000';
+  }
+  return 'http://localhost:3000';
+}
+const API_BASE = getApiUrl() + '/api';
 
 /**
  * Convierte un ArrayBuffer a base64url
@@ -28,9 +39,10 @@ function fromBase64Url(base64url: string): Uint8Array {
  * Interfaz para opciones de registro
  */
 interface RegisterOptions {
-  id: string;
-  name: string;
+  id?: string;       // Auto-generado si no se provee
+  name: string;      // Email o username del usuario
   displayName?: string;
+  deviceName?: string; // Nombre del dispositivo (ej: "Mi Laptop", "iPhone")
 }
 
 /**
@@ -70,9 +82,12 @@ function validateWebAuthnSupport(): void {
 export async function registerPasskey(opts: RegisterOptions): Promise<RegisterResponse> {
   validateWebAuthnSupport();
 
-  if (!opts.id || !opts.name) {
-    throw new Error('ID y nombre de usuario son requeridos');
+  if (!opts.name) {
+    throw new Error('Nombre de usuario es requerido');
   }
+
+  // Generar id si no se provee
+  const credId = opts.id || `user-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   try {
     // 1. Solicitar opciones de registro al backend
@@ -101,7 +116,7 @@ export async function registerPasskey(opts: RegisterOptions): Promise<RegisterRe
         // id: window.location.hostname // Omitido para evitar errores de dominio inválido en IPs como 127.0.0.1
       },
       user: {
-        id: new TextEncoder().encode(opts.id),
+        id: new TextEncoder().encode(credId),
         name: opts.name,
         displayName: opts.displayName || opts.name
       },
@@ -110,8 +125,7 @@ export async function registerPasskey(opts: RegisterOptions): Promise<RegisterRe
         { alg: -257, type: 'public-key' }
       ],
       authenticatorSelection: {
-        authenticatorAttachment: 'platform',
-        userVerification: 'required',
+        userVerification: 'preferred',
         residentKey: 'preferred'
       },
       timeout: 60000,
@@ -139,7 +153,7 @@ export async function registerPasskey(opts: RegisterOptions): Promise<RegisterRe
         credentialId: toBase64Url(cred.rawId as ArrayBuffer),
         publicKey: toBase64Url(attResp.attestationObject),
         username: opts.name,
-        displayName: opts.displayName || opts.name,
+        displayName: opts.deviceName || opts.displayName || opts.name,
         aaguid: ''
       })
     });
@@ -209,7 +223,7 @@ export async function authenticatePasskey(
     const publicKey: PublicKeyCredentialRequestOptions = {
       challenge: challengeArray,
       timeout: 60000,
-      userVerification: 'required',
+      userVerification: 'preferred',
       allowCredentials: [],
       // rp.id is not required for authentication request options, but ensure hostname consistency if needed
     } as any;
@@ -250,6 +264,19 @@ export async function authenticatePasskey(
       localStorage.setItem('passkey_user_id', result.userId);
       localStorage.setItem('passkey_username', result.username);
       localStorage.setItem('passkey_display_name', result.displayName);
+
+      // También guardar en el formato de AuthService para unificación de sesión
+      localStorage.setItem('cenvote_auth_token', result.authToken);
+      localStorage.setItem('cenvote_auth_user', JSON.stringify(result.user || {
+        _id: result.userId,
+        first_name: result.displayName || result.username,
+        paternal_last_name: '',
+        maternal_last_name: '',
+        email: result.username,
+        phone: '',
+        role: result.user?.role || 'user',
+        wallet_address: result.user?.wallet_address || result.userId
+      }));
     }
 
     console.log('[PasskeyService] ✓ Autenticación exitosa');

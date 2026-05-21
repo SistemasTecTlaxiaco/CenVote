@@ -1,6 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/AuthGuard.astro';
 ---
+
+<AuthGuard allowedRoles={['admin']} />
 
 <Layout title="Gestión de Candidatos - CenVote">
   <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
@@ -391,12 +394,12 @@ import Layout from '../../layouts/Layout.astro';
   });
 
   // Event Listeners
-  document.addEventListener('DOMContentLoaded', async () => {
-    document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+  async function initCandidates() {
+    document.getElementById('cancelBtn')?.addEventListener('click', cancelEdit);
     
     // Buscador de usuarios
-    document.getElementById('userSearchInput').addEventListener('input', (e) => {
-      searchUsers(e.target.value);
+    document.getElementById('userSearchInput')?.addEventListener('input', (e) => {
+      searchUsers((e.target as HTMLInputElement).value);
     });
     
     // Auto-detectar wallet al cargar
@@ -405,7 +408,13 @@ import Layout from '../../layouts/Layout.astro';
     // Cargar datos
     await loadUsers();
     await loadCandidates();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCandidates);
+  } else {
+    initCandidates();
+  }
 
   // Hacer funciones globales
   window.selectUser = selectUser;
