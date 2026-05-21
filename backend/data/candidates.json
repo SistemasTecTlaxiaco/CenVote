@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "candidate-1779219125591",
+    "name": "Irvin JImenez Sanchez",
+    "rfc": "irvingjimenezsanchez5@gmail.com",
+    "wallet_address": null
+  },
+  {
+    "_id": "candidate-1779219129434",
+    "name": "marco Garcia Garcia",
+    "rfc": "whotmaster@gmail.com",
+    "wallet_address": null
+  },
+  {
+    "_id": "candidate-1779333516308",
+    "name": "Candidate Test",
+    "rfc": "RFC123456TEST",
+    "wallet_address": "GBTESTWALLETADDRESS1234567890"
+  }
+]

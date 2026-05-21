@@ -1,0 +1,52 @@
+[
+  {
+    "_id": "survey-1779219762833",
+    "name": "PRESIDENCIA MUNICIPAL DE TLAXIACO",
+    "description": "ELIJE A TU PRESIDENT FAVORITO",
+    "start_date": "2026-05-19T13:42",
+    "end_date": "2026-05-20T13:42",
+    "candidates": [
+      "candidate-1779219125591",
+      "candidate-1779219129434"
+    ],
+    "created_by": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT"
+  },
+  {
+    "_id": "survey-1779333524304",
+    "name": "Backend Verification Survey",
+    "description": "A survey to verify backend functionality",
+    "start_date": "2026-05-20T12:00",
+    "end_date": "2026-05-21T12:00",
+    "candidates": [
+      "candidate-1779333516308",
+      "candidate-1779219125591"
+    ],
+    "created_by": "GBTESTWALLETADDRESS1234567890"
+  },
+  {
+    "_id": "survey-1779333638643",
+    "name": "PRESIDENCIA TECX",
+    "description": "vota por el nuevo presidetente",
+    "start_date": "2026-05-20T21:20",
+    "end_date": "2026-05-21T21:20",
+    "candidates": [
+      "candidate-1779219125591",
+      "candidate-1779219129434"
+    ],
+    "created_by": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT"
+  },
+  {
+    "_id": "survey-1779334068376",
+    "name": "JEFE DE GRUPO",
+    "description": "VOTA POR JEFE DE GRUPO",
+    "start_date": "2026-05-20T21:27",
+    "end_date": "2026-05-22T21:27",
+    "candidates": [
+      "candidate-1779219129434",
+      "candidate-1779219125591",
+      "candidate-1779333516308"
+    ],
+    "created_by": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT",
+    "creation_tx_hash": "edc3975114601fdbc39acc1d02369a9a33f9fc617ad34449db855d4196a30e21"
+  }
+]

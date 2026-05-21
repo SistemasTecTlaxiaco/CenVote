@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "user-1779219084519",
+    "first_name": "Irvin",
+    "paternal_last_name": "JImenez",
+    "maternal_last_name": "Sanchez",
+    "phone": "9531643574",
+    "email": "irvingjimenezsanchez5@gmail.com",
+    "wallet_address": null
+  },
+  {
+    "_id": "user-1779219112059",
+    "first_name": "marco",
+    "paternal_last_name": "Garcia",
+    "maternal_last_name": "Garcia",
+    "phone": "5537302486",
+    "email": "whotmaster@gmail.com",
+    "wallet_address": null
+  },
+  {
+    "_id": "user-1779333512588",
+    "first_name": "Test",
+    "paternal_last_name": "User",
+    "maternal_last_name": "Backend",
+    "phone": "1234567890",
+    "email": "testuser@example.com",
+    "wallet_address": "GBTESTWALLETADDRESS1234567890"
+  }
+]

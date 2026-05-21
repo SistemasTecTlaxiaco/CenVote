@@ -1,0 +1,191 @@
+---
+// SidebarNav.astro - Navegación lateral fija
+import WalletConnector from './WalletConnector.astro';
+const currentPath = Astro.url.pathname;
+
+interface NavItem {
+  label: string;
+  path: string;
+  icon: string;
+  description: string;
+}
+
+const navItems: NavItem[] = [
+  {
+    label: "Inicio",
+    path: "/",
+    icon: "🏠",
+    description: "Panel principal"
+  },
+  {
+    label: "Usuarios",
+    path: "/users",
+    icon: "👥",
+    description: "Gestionar usuarios"
+  },
+  {
+    label: "Candidatos",
+    path: "/candidates",
+    icon: "🎯",
+    description: "Gestionar candidatos"
+  },
+  {
+    label: "Encuestas",
+    path: "/surveys",
+    icon: "📊",
+    description: "Gestionar encuestas"
+  }
+];
+
+const isActive = (path: string) => {
+  if (path === "/" && currentPath === "/") return true;
+  if (path !== "/" && currentPath.startsWith(path)) return true;
+  return false;
+};
+---
+
+<!-- Botón de Menú Móvil -->
+<button id="mobile-menu-toggle" class="fixed top-4 left-4 z-50 p-3 rounded-xl bg-slate-900/80 border border-white/10 backdrop-blur-md text-white hover:bg-slate-800 transition-all duration-300 shadow-lg">
+  <span id="menu-icon" class="text-xl">🍔</span>
+</button>
+
+<nav class="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-slate-900 via-purple-900/50 to-slate-900 border-r border-white/10 backdrop-blur-xl z-40 shadow-2xl">
+  <!-- Logo Section -->
+  <div class="p-6 border-b border-white/10">
+    <div class="flex items-center gap-3 mb-2">
+      <div class="text-3xl">🗳️</div>
+      <h1 class="text-xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+        CenVote
+      </h1>
+    </div>
+    <p class="text-xs text-gray-400">Plataforma de Votación Descentralizada</p>
+  </div>
+
+  <!-- Navigation Items -->
+  <div class="p-4 space-y-2">
+    {navItems.map((item) => (
+      <a
+        href={item.path}
+        class={`group flex items-start gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+          isActive(item.path)
+            ? "bg-gradient-to-r from-purple-600/40 to-blue-600/40 border border-purple-400/30 shadow-lg shadow-purple-500/20"
+            : "hover:bg-white/5 border border-transparent"
+        }`}
+        title={item.description}
+      >
+        <span class="text-2xl group-hover:scale-110 transition-transform duration-300">
+          {item.icon}
+        </span>
+        <div class="flex-1">
+          <div class={`text-sm font-semibold ${
+            isActive(item.path)
+              ? "text-white"
+              : "text-gray-300 group-hover:text-white"
+          }`}>
+            {item.label}
+          </div>
+          <div class="text-xs text-gray-500 group-hover:text-gray-400">
+            {item.description}
+          </div>
+        </div>
+        {isActive(item.path) && (
+          <div class="w-1 h-6 bg-gradient-to-b from-purple-400 to-blue-400 rounded-full"></div>
+        )}
+      </a>
+    ))}
+  </div>
+
+  <!-- Stats Section -->
+  <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-gradient-to-t from-slate-900 to-transparent">
+    <!-- Wallet Connection Section -->
+    <div class="mb-4">
+      <p class="text-[10px] font-bold text-purple-300 uppercase tracking-wider mb-2 px-1">Cartera Stellar</p>
+      <WalletConnector />
+    </div>
+    
+    <div class="h-px bg-white/10 my-3"></div>
+
+    <div class="space-y-2 text-xs">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-400">Estado:</span>
+        <span class="text-green-400 flex items-center gap-1">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          Activo
+        </span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-gray-400">Red:</span>
+        <span class="text-blue-400">Testnet</span>
+      </div>
+      <div class="h-px bg-white/10 my-3"></div>
+      <p class="text-gray-500 text-center py-2">
+        © 2026 CenVote
+      </p>
+    </div>
+  </div>
+</nav>
+
+<script>
+  const toggleBtn = document.getElementById('mobile-menu-toggle');
+  const sidebar = document.querySelector('nav');
+  const icon = document.getElementById('menu-icon');
+
+  if (toggleBtn && sidebar && icon) {
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+      const isOpen = sidebar.classList.contains('active');
+      icon.textContent = isOpen ? '✕' : '🍔';
+      
+      if (isOpen) {
+        toggleBtn.style.left = '17rem';
+      } else {
+        toggleBtn.style.left = '1rem';
+      }
+    });
+    
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (sidebar.classList.contains('active') && 
+          !sidebar.contains(target) && 
+          !toggleBtn.contains(target)) {
+        sidebar.classList.remove('active');
+        icon.textContent = '🍔';
+        toggleBtn.style.left = '1rem';
+      }
+    });
+  }
+</script>
+
+<style is:global>
+  #mobile-menu-toggle {
+    display: none;
+  }
+
+  /* Ajustar el main content para dejar espacio al sidebar */
+  body {
+    --sidebar-width: 16rem; /* 64 * 0.25rem */
+  }
+
+  main, .main-content {
+    margin-left: var(--sidebar-width);
+  }
+
+  @media (max-width: 768px) {
+    #mobile-menu-toggle {
+      display: block;
+    }
+
+    main, .main-content {
+      margin-left: 0 !important;
+    }
+
+    nav {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    nav.active {
+      transform: translateX(0);
+    }
+  }
+</style>

@@ -1,0 +1,198 @@
+---
+// Test page para verificar la conexión de Freighter
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Test Freighter Connection">
+  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-900 to-slate-950 p-8">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-4xl font-bold text-white mb-8">🔬 Test de Conexión Freighter</h1>
+      
+      <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-6">
+        <h2 class="text-2xl font-bold text-white mb-4">Estado de la Wallet</h2>
+        
+        <div id="status" class="space-y-3 mb-6">
+          <p class="text-gray-300">Esperando conexión...</p>
+        </div>
+
+        <div class="flex gap-3">
+          <button 
+            id="connectBtn"
+            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all"
+          >
+            🔗 Conectar Freighter
+          </button>
+          
+          <button 
+            id="checkBtn"
+            class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-all"
+          >
+            🔍 Verificar Estado
+          </button>
+
+          <button 
+            id="balanceBtn"
+            class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all"
+          >
+            💰 Ver Balance
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-white/10">
+        <h3 class="text-xl font-bold text-white mb-3">📋 Console Log</h3>
+        <pre id="console" class="text-sm text-green-400 font-mono overflow-auto max-h-96 whitespace-pre-wrap"></pre>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+import { freighterService } from '../services/FreighterService';
+
+const statusDiv = document.getElementById('status') as HTMLElement;
+const consoleDiv = document.getElementById('console') as HTMLElement;
+const connectBtn = document.getElementById('connectBtn') as HTMLButtonElement;
+const checkBtn = document.getElementById('checkBtn') as HTMLButtonElement;
+const balanceBtn = document.getElementById('balanceBtn') as HTMLButtonElement;
+
+function log(message: string, type: 'info' | 'success' | 'error' = 'info') {
+  const timestamp = new Date().toLocaleTimeString();
+  const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+  const line = `[${timestamp}] ${prefix} ${message}\n`;
+  
+  if (consoleDiv) {
+    consoleDiv.textContent += line;
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+  }
+  
+  console.log(message);
+}
+
+function updateStatus(html: string) {
+  if (statusDiv) {
+    statusDiv.innerHTML = html;
+  }
+}
+
+async function handleConnect() {
+  try {
+    log('Iniciando conexión con Freighter...');
+    updateStatus('<p class="text-yellow-300">⏳ Conectando...</p>');
+    
+    const result = await freighterService.connect();
+    
+    if (result.success) {
+      log(`Conexión exitosa: ${result.publicKey}`, 'success');
+      
+      const isExpected = result.publicKey === freighterService.expectedPublicKey;
+      
+      updateStatus(`
+        <div class="space-y-2">
+          <p class="text-green-400 font-bold">✅ Wallet Conectada</p>
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold">Clave Pública:</span><br/>
+            <code class="text-xs bg-black/30 px-2 py-1 rounded">${result.publicKey}</code>
+          </p>
+          <p class="text-sm ${isExpected ? 'text-green-400' : 'text-yellow-400'}">
+            ${isExpected ? '✅ Es la cuenta esperada' : '⚠️ No es la cuenta esperada'}
+          </p>
+          <p class="text-sm text-gray-400">
+            Red: ${freighterService.networkDetails?.network || 'N/A'}
+          </p>
+        </div>
+      `);
+    } else {
+      log(`Error: ${result.message}`, 'error');
+      updateStatus(`<p class="text-red-400">❌ ${result.message}</p>`);
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
+    log(`Error inesperado: ${errorMsg}`, 'error');
+    updateStatus(`<p class="text-red-400">❌ Error: ${errorMsg}</p>`);
+  }
+}
+
+async function handleCheck() {
+  try {
+    log('Verificando estado de conexión...');
+    
+    const installed = await freighterService.isFreighterInstalled();
+    log(`Freighter instalado: ${installed}`);
+    
+    const connected = await freighterService.checkConnection();
+    log(`Conexión activa: ${connected}`);
+    
+    if (freighterService.isConnected) {
+      log(`Clave pública: ${freighterService.publicKey}`, 'success');
+      log(`Red: ${freighterService.networkDetails?.network}`, 'info');
+    }
+    
+    updateStatus(`
+      <div class="space-y-1 text-sm">
+        <p class="${installed ? 'text-green-400' : 'text-red-400'}">
+          Freighter: ${installed ? 'Instalado ✅' : 'No instalado ❌'}
+        </p>
+        <p class="${connected ? 'text-green-400' : 'text-gray-400'}">
+          Conexión: ${connected ? 'Activa ✅' : 'Inactiva'}
+        </p>
+        ${freighterService.publicKey ? `
+          <p class="text-gray-300">
+            Cuenta: <code class="text-xs">${freighterService.publicKey.slice(0, 10)}...</code>
+          </p>
+        ` : ''}
+      </div>
+    `);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
+    log(`Error al verificar: ${errorMsg}`, 'error');
+  }
+}
+
+async function handleBalance() {
+  try {
+    if (!freighterService.isConnected) {
+      log('Wallet no conectada. Conecta primero.', 'error');
+      return;
+    }
+    
+    log('Obteniendo balance...');
+    updateStatus('<p class="text-yellow-300">⏳ Consultando balance...</p>');
+    
+    const balance = await freighterService.getAccountBalance();
+    
+    if (balance) {
+      log(`Balance: ${balance.balance} ${balance.asset}`, 'success');
+      updateStatus(`
+        <div class="space-y-2">
+          <p class="text-green-400 font-bold">💰 Balance Obtenido</p>
+          <p class="text-2xl text-white font-bold">
+            ${parseFloat(balance.balance).toFixed(2)} ${balance.asset}
+          </p>
+          <p class="text-xs text-gray-400">
+            Cuenta: ${freighterService.publicKey.slice(0, 6)}...${freighterService.publicKey.slice(-6)}
+          </p>
+        </div>
+      `);
+    } else {
+      log('No se pudo obtener el balance', 'error');
+      updateStatus('<p class="text-red-400">❌ Error al obtener balance</p>');
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
+    log(`Error: ${errorMsg}`, 'error');
+  }
+}
+
+// Event listeners
+connectBtn?.addEventListener('click', handleConnect);
+checkBtn?.addEventListener('click', handleCheck);
+balanceBtn?.addEventListener('click', handleBalance);
+
+// Verificación inicial
+document.addEventListener('DOMContentLoaded', async () => {
+  log('Página de test cargada');
+  log(`Cuenta esperada: ${freighterService.expectedPublicKey}`);
+  await handleCheck();
+});
+</script>
