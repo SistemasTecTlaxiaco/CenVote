@@ -63,5 +63,21 @@
     ],
     "created_by": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT",
     "creation_tx_hash": "0b0eaf2e372418459e68e5e67394cb3d8e0293dc0f447276e819d88e33018eaf"
+  },
+  {
+    "_id": "survey-1779475015581",
+    "name": "PUTO EL QUE VOTE",
+    "description": "No votes por pedro",
+    "start_date": "2026-05-22T12:36",
+    "end_date": "2026-05-24T12:36",
+    "candidates": [
+      "candidate-1779219125591",
+      "candidate-1779396646497",
+      "candidate-1779474326400",
+      "candidate-1779338020475",
+      "candidate-1779219129434"
+    ],
+    "created_by": "GD6HKK4V76OE23YCX4IQYFK27C6K65PVZDVISXALABAWYERZER4YYOHT",
+    "creation_tx_hash": "4f37e016c29d4d770f9cb1dc178efe1345c3f21d1e0822002a2a0687b90c1a64"
   }
 ]

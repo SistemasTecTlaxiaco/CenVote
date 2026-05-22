@@ -92,10 +92,6 @@ import AuthGuard from '../../components/AuthGuard.astro';
           </div>
           
           <div class="flex justify-end space-x-4 pt-4 border-t border-white/10">
-            <button type="button" id="connectWalletBtn"
-              class="btn-primary">
-              🔗 Conectar Wallet
-            </button>
             <button type="button" id="cancelBtn" style="display: none;"
               class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 bg-gradient-to-r from-gray-600 to-gray-700 text-white hover:from-gray-700 hover:to-gray-800">
               ❌ Cancelar
@@ -135,6 +131,31 @@ import AuthGuard from '../../components/AuthGuard.astro';
       <div id="voteContent">
         <!-- Se cargará dinámicamente -->
       </div>
+    </div>
+  </div>
+
+  <!-- Modal de Transacción (Creación de Encuesta) -->
+  <div id="txModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="card-glass max-w-md w-full p-8 rounded-3xl border-2 border-purple-500/30 text-center shadow-2xl shadow-purple-500/20">
+      <div id="txSpinner" class="mb-6">
+        <div class="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto"></div>
+      </div>
+      <div id="txSuccess" class="hidden mb-6 text-6xl animate-bounce">
+        ✅
+      </div>
+      <div id="txError" class="hidden mb-6 text-6xl">
+        ❌
+      </div>
+      
+      <h2 id="txTitle" class="text-2xl font-bold text-white mb-3">Procesando Transacción</h2>
+      <p id="txMessage" class="text-gray-300 mb-6">Iniciando cobro de 5 XLM...</p>
+      
+      <div id="txDetails" class="bg-black/40 p-4 rounded-xl border border-white/10 text-xs text-left hidden mb-6 text-gray-400 break-all font-mono">
+      </div>
+
+      <button id="txCloseBtn" type="button" class="hidden w-full btn-primary py-3" onclick="closeTxModal()">
+        Cerrar
+      </button>
     </div>
   </div>
 </Layout>
@@ -846,8 +867,6 @@ import AuthGuard from '../../components/AuthGuard.astro';
             <strong>⚠️ Error de pago:</strong> Debes conectar tu wallet para realizar el pago de creación de la encuesta (5.0 XLM).
           </div>
         `;
-        // Enfocar / hacer scroll al botón de wallet
-        document.getElementById('connectWalletBtn').scrollIntoView({ behavior: 'smooth' });
         return;
       }
 
@@ -856,15 +875,31 @@ import AuthGuard from '../../components/AuthGuard.astro';
         return;
       }
 
+      const txModal = document.getElementById('txModal');
+      const txTitle = document.getElementById('txTitle');
+      const txMessage = document.getElementById('txMessage');
+      const txSpinner = document.getElementById('txSpinner');
+      const txSuccess = document.getElementById('txSuccess');
+      const txError = document.getElementById('txError');
+      const txCloseBtn = document.getElementById('txCloseBtn');
+      const txDetails = document.getElementById('txDetails');
+
       try {
         submitBtn.disabled = true;
         document.getElementById('submitBtnText').textContent = '⏳ Procesando pago XLM...';
-        formAlert.classList.remove('hidden');
-        formAlert.innerHTML = `
-          <div class="bg-blue-500/20 border-blue-500 text-blue-300">
-            <strong>⏳ Autorizando:</strong> Por favor firma el cobro de 5.0 XLM en la ventana de Freighter...
-          </div>
-        `;
+        formAlert.classList.add('hidden');
+        
+        // Mostrar modal
+        txModal.classList.remove('hidden');
+        txSpinner.classList.remove('hidden');
+        txSuccess.classList.add('hidden');
+        txError.classList.add('hidden');
+        txCloseBtn.classList.add('hidden');
+        txDetails.classList.add('hidden');
+        
+        txTitle.textContent = 'Autorizando Transacción';
+        txTitle.className = 'text-2xl font-bold text-white mb-3';
+        txMessage.textContent = 'Por favor aprueba el cobro de 5.0 XLM en la ventana de Freighter...';
 
         const { votingService } = await import('../../services/VotingService');
         const paymentResult = await votingService.paySurveyCreationFee();
@@ -875,14 +910,28 @@ import AuthGuard from '../../components/AuthGuard.astro';
 
         creationTxHash = paymentResult.transactionHash;
         console.log('✅ Pago de creación exitoso. Hash:', creationTxHash);
+        
+        txSpinner.classList.add('hidden');
+        txSuccess.classList.remove('hidden');
+        txTitle.textContent = 'Pago Exitoso';
+        txTitle.className = 'text-2xl font-bold text-green-400 mb-3';
+        txMessage.textContent = 'Guardando encuesta en la base de datos...';
+        txDetails.classList.remove('hidden');
+        txDetails.innerHTML = `<strong>Hash de Transacción:</strong><br>${creationTxHash}`;
+        
+        // Esperar 1.5s antes de cerrar el modal automáticamente
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        txModal.classList.add('hidden');
+        
       } catch (err: any) {
         console.error('Error al procesar pago de creación:', err);
-        formAlert.classList.remove('hidden');
-        formAlert.innerHTML = `
-          <div class="bg-red-500/20 border-red-500 text-red-300">
-            <strong>❌ Error de pago:</strong> ${err.message}
-          </div>
-        `;
+        txSpinner.classList.add('hidden');
+        txError.classList.remove('hidden');
+        txTitle.textContent = 'Transacción Fallida';
+        txTitle.className = 'text-2xl font-bold text-red-400 mb-3';
+        txMessage.textContent = err.message;
+        txCloseBtn.classList.remove('hidden');
+        
         submitBtn.disabled = false;
         document.getElementById('submitBtnText').textContent = '✨ Crear Encuesta';
         return;
@@ -953,7 +1002,6 @@ import AuthGuard from '../../components/AuthGuard.astro';
 
   // Event Listeners
   async function initSurveys() {
-    document.getElementById('connectWalletBtn')?.addEventListener('click', connectWallet);
     document.getElementById('cancelBtn')?.addEventListener('click', cancelEdit);
     
     // Auto-detectar wallet al cargar
@@ -978,6 +1026,12 @@ import AuthGuard from '../../components/AuthGuard.astro';
   window.openVoteModal = openVoteModal;
   window.closeVoteModal = closeVoteModal;
   window.vote = vote;
+
+  // Global functions for modal
+  function closeTxModal() {
+    document.getElementById('txModal').classList.add('hidden');
+  }
+  window.closeTxModal = closeTxModal;
 
 </script>
 

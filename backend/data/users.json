@@ -79,5 +79,17 @@
     "role": "user",
     "wallet_address": null,
     "created_at": "2026-05-21T19:49:33.201Z"
+  },
+  {
+    "_id": "user-1779472194312",
+    "first_name": "irvinjimenez1488",
+    "paternal_last_name": "",
+    "maternal_last_name": "",
+    "phone": "",
+    "email": "irvinjimenez1488@gmail.com",
+    "password": "9d83011059e577fe905b4c8df30c6432:2ab2a79d92875bc85e41ec4c24943dd66a50ad6cc0d54f191b7c8e048d587ed342962e7669bb6543debb93f6f6703d4a570ad4fe0dfbb3ae30450e4e7ab950ce",
+    "role": "user",
+    "wallet_address": null,
+    "created_at": "2026-05-22T17:49:54.312Z"
   }
 ]

@@ -110,7 +110,7 @@ const { title = 'Autenticación Passkey', showDebug = false } = Astro.props as P
       // PASO 2: Preparar credencial para WebAuthn
       appendDebug('[PASO 2] Preparando credencial WebAuthn...');
       const publicKey = {
-        challenge: new Uint8Array(challenge),
+        challenge: fromBase64Url(challenge),
         rp: {
           name: 'CenVote dApp'
           // id: eliminado para evitar error "Invalid domain" (usa el dominio actual por defecto)
@@ -228,7 +228,7 @@ const { title = 'Autenticación Passkey', showDebug = false } = Astro.props as P
       // PASO 2: Preparar credencial para WebAuthn
       appendDebug('[PASO 2] Preparando autenticación...');
       const publicKey = {
-        challenge: new Uint8Array(challenge),
+        challenge: fromBase64Url(challenge),
         timeout: 60000,
         userVerification: 'required',
         allowCredentials: []

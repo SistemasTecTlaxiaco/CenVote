@@ -100,12 +100,7 @@ import Layout from '../../layouts/Layout.astro';
             </button>
           </form>
           
-          <!-- Acceso Rápido Administrador -->
-          <div class="mt-4 p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-center">
-            <button type="button" id="quick-admin-login-btn" class="text-xs font-bold text-purple-300 hover:text-purple-200 transition-colors flex items-center justify-center gap-1.5 mx-auto w-full">
-              🛡️ Acceder como Administrador (Pruebas)
-            </button>
-          </div>
+
         </div>
 
         <!-- ===== PANEL CREAR CUENTA ===== -->
@@ -323,20 +318,7 @@ import Layout from '../../layouts/Layout.astro';
     }
   });
 
-  // ===== ACCESO RÁPIDO ADMINISTRADOR =====
-  const quickAdminBtn = document.getElementById('quick-admin-login-btn');
-  quickAdminBtn?.addEventListener('click', () => {
-    const emailInput = document.getElementById('login-email') as HTMLInputElement;
-    const passwordInput = document.getElementById('login-password') as HTMLInputElement;
-    if (emailInput && passwordInput && loginForm) {
-      emailInput.value = 'admin@cenvote.com';
-      passwordInput.value = 'admin123';
-      
-      // Enviar el formulario directamente
-      const submitEvent = new Event('submit', { cancelable: true });
-      loginForm.dispatchEvent(submitEvent);
-    }
-  });
+
 
   // ===== REGISTRO DE NUEVA CUENTA =====
   const registerForm = document.getElementById('registerForm');
