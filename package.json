@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "start": "serve dist -l $PORT"
   },
   "dependencies": {
     "@stellar/freighter-api": "^5.0.0",
@@ -16,6 +17,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "mongoose": "^8.20.1",
+    "serve": "^14.2.6",
     "stellar-sdk": "^13.3.0"
   },
   "devDependencies": {
