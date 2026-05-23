@@ -669,41 +669,21 @@ app.get('/api/debug', async (req, res) => {
 
 // ===== START SERVER =====
 const __filename = fileURLToPath(import.meta.url);
-if (process.argv[1] === __filename) { (async () => {
-  const PORT = process.env.PORT || 3000;
-  const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
-  
-  const __dirname = path.dirname(__filename);
-  const certPath = path.resolve(__dirname, '../cert.pem');
-  const keyPath = path.resolve(__dirname, '../key.pem');
-  
-  // 1. Siempre iniciar el servidor HTTP en el puerto base (3000)
-  // Seed admin user
-  await seedAdmin();
 
-  app.listen(PORT, () => {
-    console.log(`🚀 HTTP Server running on port ${PORT}`);
-    console.log(`📁 Using local JSON database (backend/data/)`);
-    console.log(`📱 Passkey API: http://localhost:${PORT}/api/passkey/`);
-    console.log(`🔍 Debug: http://localhost:${PORT}/api/debug`);
-  });
-  
-  // 2. Si existen certificados, iniciar también el servidor HTTPS en el puerto secundario (3001)
-  if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-    try {
-      const options = {
-        key: fs.readFileSync(keyPath),
-        cert: fs.readFileSync(certPath)
-      };
-      https.createServer(options, app).listen(HTTPS_PORT, () => {
-        console.log(`🚀 HTTPS Server running on port ${HTTPS_PORT}`);
-        console.log(`📱 Passkey API: https://localhost:${HTTPS_PORT}/api/passkey/`);
-        console.log(`🔍 Debug: https://localhost:${HTTPS_PORT}/api/debug`);
-      });
-    } catch (err) {
-      console.error('❌ Failed to start HTTPS Server:', err);
-    }
-  }
-})(); }
+if (process.argv[1] === __filename) {
+  (async () => {
+
+    const PORT = process.env.PORT || 3000;
+
+    // Seed admin user
+    await seedAdmin();
+
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📁 Using local JSON database (backend/data/)`);
+    });
+
+  })();
+}
 
 export default app;
