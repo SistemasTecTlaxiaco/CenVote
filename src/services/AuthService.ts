@@ -126,7 +126,12 @@ class AuthService {
         if (typeof window === 'undefined') return null;
         try {
             const raw = localStorage.getItem(this.STORAGE_KEY_USER);
-            return raw ? JSON.parse(raw) : null;
+            if (!raw) return null;
+            const user = JSON.parse(raw);
+            if (user && !user.role) {
+                user.role = 'user'; // Fallback robusto para evitar inconsistencias de rol en usuarios heredados
+            }
+            return user;
         } catch { return null; }
     }
 

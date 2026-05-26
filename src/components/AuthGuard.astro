@@ -25,35 +25,47 @@ const { allowedRoles = ['admin', 'user'] } = Astro.props;
   import { authService } from '../services/AuthService';
 
   function checkAuth() {
-    const metaEl = document.getElementById('auth-guard-meta');
-    if (!metaEl) {
-      document.documentElement.classList.remove('auth-loading');
-      return;
-    }
-
-    const allowedRoles = JSON.parse(metaEl.getAttribute('data-roles') || '[]');
-
-    // Verificar si está autenticado
-    if (!authService.isAuthenticated()) {
-      window.location.href = '/login';
-      return;
-    }
-
-    const user = authService.getUser();
-    
-    // Si no coincide el rol, redirigir según el rol del usuario
-    if (!user || !allowedRoles.includes(user.role)) {
-      console.warn('Acceso denegado para el rol:', user ? user.role : 'invitado');
-      if (user && user.role === 'admin') {
-        window.location.href = '/';
-      } else {
-        window.location.href = '/dashboard';
+    try {
+      const metaEl = document.getElementById('auth-guard-meta');
+      if (!metaEl) {
+        document.documentElement.classList.remove('auth-loading');
+        return;
       }
-      return;
-    }
 
-    // Autenticación correcta: revelar la página
-    document.documentElement.classList.remove('auth-loading');
+      const allowedRoles = JSON.parse(metaEl.getAttribute('data-roles') || '[]');
+
+      // Verificar si está autenticado
+      if (!authService.isAuthenticated()) {
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        return;
+      }
+
+      const user = authService.getUser();
+      const userRole = (user && user.role) ? user.role : 'user'; // Fallback seguro
+      
+      // Si no coincide el rol, redirigir según el rol del usuario
+      if (!user || !allowedRoles.includes(userRole)) {
+        console.warn('Acceso denegado para el rol:', userRole);
+        const targetPath = userRole === 'admin' ? '/' : '/dashboard';
+        
+        // Evitar bucle de redirección si ya estamos en la ruta destino
+        if (window.location.pathname !== targetPath) {
+          window.location.href = targetPath;
+        } else {
+          document.documentElement.classList.remove('auth-loading');
+        }
+        return;
+      }
+
+      // Autenticación correcta: revelar la página
+      document.documentElement.classList.remove('auth-loading');
+    } catch (err) {
+      console.error('[AuthGuard] Error crítico en la verificación de sesión:', err);
+      // Revelar la página en caso de fallo crítico de script para evitar pantalla negra
+      document.documentElement.classList.remove('auth-loading');
+    }
   }
 
   // Ejecutar verificación de autenticación

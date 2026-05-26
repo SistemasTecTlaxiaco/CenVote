@@ -108,12 +108,17 @@ export async function registerPasskey(opts: RegisterOptions): Promise<RegisterRe
 
     // 2. Crear credencial con WebAuthn
     // Decode challenge (base64url) to Uint8Array
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname) || hostname.includes(':');
+    const rpId = (isIP || hostname === 'localhost' || !hostname) ? undefined : hostname;
+
+    // Decode challenge (base64url) to Uint8Array
     const challengeArray = typeof challenge === 'string' ? fromBase64Url(challenge) : new Uint8Array(challenge);
     const publicKey: PublicKeyCredentialCreationOptions = {
       challenge: challengeArray,
       rp: {
-        name: 'CenVote dApp'
-        // id: window.location.hostname // Omitido para evitar errores de dominio inválido en IPs como 127.0.0.1
+        name: 'CenVote dApp',
+        ...(rpId ? { id: rpId } : {})
       },
       user: {
         id: new TextEncoder().encode(credId),
@@ -220,12 +225,16 @@ export async function authenticatePasskey(
     // 2. Autenticar con WebAuthn
     // Decode challenge (base64url) to Uint8Array
     const challengeArray = typeof challenge === 'string' ? fromBase64Url(challenge) : new Uint8Array(challenge);
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname) || hostname.includes(':');
+    const rpId = (isIP || hostname === 'localhost' || !hostname) ? undefined : hostname;
+
     const publicKey: PublicKeyCredentialRequestOptions = {
       challenge: challengeArray,
       timeout: 60000,
       userVerification: 'preferred',
       allowCredentials: [],
-      // rp.id is not required for authentication request options, but ensure hostname consistency if needed
+      ...(rpId ? { rpId } : {})
     } as any;
 
     console.log('[PasskeyService] Autenticando con passkey...');
