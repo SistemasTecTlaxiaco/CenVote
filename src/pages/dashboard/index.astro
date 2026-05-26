@@ -142,6 +142,7 @@ import AuthGuard from '../../components/AuthGuard.astro';
 
   // Verificar passkeys registradas en el backend
   async function checkPasskeys(username: string) {
+    if (!username || username === 'undefined') return;
     try {
       const response = await fetch(`${API_URL}/api/passkey/list/${username}`);
       const descEl = document.getElementById('passkey-widget-desc');

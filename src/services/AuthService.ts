@@ -141,7 +141,35 @@ class AuthService {
     }
 
     isAuthenticated(): boolean {
-        return !!this.getToken() && !!this.getUser();
+        try {
+            const token = this.getToken();
+            const user = this.getUser();
+            
+            // 1. Validar existencia e integridad del token
+            if (!token || typeof token !== 'string' || token.trim() === '') {
+                return false;
+            }
+            
+            // 2. Validar existencia e integridad mínima del objeto de usuario
+            if (!user || typeof user !== 'object') {
+                return false;
+            }
+            
+            // 3. Validar la presencia de un identificador de usuario válido
+            if (!user._id || typeof user._id !== 'string' || user._id.trim() === '') {
+                return false;
+            }
+            
+            // 4. Validar la presencia de un correo o nombre de usuario
+            const emailOrUsername = user.email || (user as any).username;
+            if (!emailOrUsername || typeof emailOrUsername !== 'string' || emailOrUsername.trim() === '') {
+                return false;
+            }
+            
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     isAdmin(): boolean {
