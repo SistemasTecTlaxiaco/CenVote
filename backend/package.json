@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@stellar/stellar-sdk": "^15.1.0",
     "cors": "^2.8.6",
