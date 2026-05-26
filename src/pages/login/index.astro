@@ -4,13 +4,19 @@ import Layout from '../../layouts/Layout.astro';
 
 <Layout title="Iniciar Sesión - CenVote" hideSidebar={true}>
   <!-- Redirigir si ya tiene sesión -->
-  <script>
-    import { authService } from '../../services/AuthService';
-    if (authService.isAuthenticated()) {
+  <script is:inline>
+  import('../../services/AuthService').then(({ authService }) => {
+    if (typeof window !== 'undefined') {
       const user = authService.getUser();
-      if (user) window.location.href = user.role === 'admin' ? '/' : '/dashboard';
+
+      if (user && authService.isAuthenticated()) {
+        window.location.href = user.role === 'admin'
+          ? '/'
+          : '/dashboard';
+      }
     }
-  </script>
+  });
+</script>
 
   <div class="min-h-screen flex items-center justify-center py-8 px-4 bg-slate-950 relative overflow-hidden">
     <!-- Fondo difuso -->
