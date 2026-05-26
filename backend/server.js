@@ -24,6 +24,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+//HEALTH ROUTES
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "CenVote Backend funcionando correctamente"
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // ===== AUTH ENDPOINTS =====
 
 // Registro de usuario normal
