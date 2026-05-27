@@ -16,41 +16,81 @@ const { allowedRoles = ['admin', 'user'] } = Astro.props;
   }
 </style>
 
-<script>
-  // Añadir la clase de bloqueo inmediatamente antes del renderizado completo
+<script is:inline>
+  // Añadir la clase de bloqueo inmediatamente de manera síncrona
   document.documentElement.classList.add('auth-loading');
 </script>
 
 <script>
   import { authService } from '../services/AuthService';
 
-  function checkAuth() {
+  async function checkAuth() {
+    const safetyTimeout = setTimeout(() => {
+      console.warn('[AuthGuard] Timeout de seguridad alcanzado. Revelando página.');
+      document.documentElement.classList.remove('auth-loading');
+    }, 4000);
+
     try {
       const metaEl = document.getElementById('auth-guard-meta');
       if (!metaEl) {
+        clearTimeout(safetyTimeout);
         document.documentElement.classList.remove('auth-loading');
         return;
       }
 
       const allowedRoles = JSON.parse(metaEl.getAttribute('data-roles') || '[]');
 
-      // Verificar si está autenticado
+      // 1. Validar sesión localmente primero
       if (!authService.isAuthenticated()) {
+        clearTimeout(safetyTimeout);
+        localStorage.removeItem('cenvote_auth_token');
+        localStorage.removeItem('cenvote_auth_user');
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
         return;
       }
 
-      const user = authService.getUser();
-      const userRole = (user && user.role) ? user.role : 'user'; // Fallback seguro
+      const token = authService.getToken();
+      const API_URL = (typeof import.meta !== 'undefined' && typeof import.meta.env !== 'undefined' && import.meta.env.PUBLIC_API_URL) || (typeof window !== 'undefined' ? (window.location.protocol === 'https:' ? 'https://' + window.location.hostname + ':3001' : 'http://' + window.location.hostname + ':3000') : 'http://localhost:3000');
       
-      // Si no coincide el rol, redirigir según el rol del usuario
-      if (!user || !allowedRoles.includes(userRole)) {
+      let sessionUser = authService.getUser();
+
+      // 2. Validar con el servidor para descartar sesiones fantasma/expiradas
+      try {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            console.warn('[AuthGuard] Sesión expirada o inválida detectada por el servidor.');
+            clearTimeout(safetyTimeout);
+            authService.logout();
+            return;
+          }
+        } else {
+          const freshUser = await res.json();
+          if (freshUser && freshUser._id) {
+            localStorage.setItem('cenvote_auth_user', JSON.stringify(freshUser));
+            sessionUser = freshUser;
+          }
+        }
+      } catch (fetchErr) {
+        console.warn('[AuthGuard] No se pudo validar la sesión con el servidor (sin conexión). Usando caché local.', fetchErr);
+      }
+
+      // 3. Verificar roles
+      const userRole = (sessionUser && sessionUser.role) ? sessionUser.role : 'user';
+
+      if (!sessionUser || !allowedRoles.includes(userRole)) {
         console.warn('Acceso denegado para el rol:', userRole);
         const targetPath = userRole === 'admin' ? '/' : '/dashboard';
         
-        // Evitar bucle de redirección si ya estamos en la ruta destino
+        clearTimeout(safetyTimeout);
         if (window.location.pathname !== targetPath) {
           window.location.href = targetPath;
         } else {
@@ -59,11 +99,12 @@ const { allowedRoles = ['admin', 'user'] } = Astro.props;
         return;
       }
 
-      // Autenticación correcta: revelar la página
+      // 4. Revelar la página si todo es válido
+      clearTimeout(safetyTimeout);
       document.documentElement.classList.remove('auth-loading');
     } catch (err) {
       console.error('[AuthGuard] Error crítico en la verificación de sesión:', err);
-      // Revelar la página en caso de fallo crítico de script para evitar pantalla negra
+      clearTimeout(safetyTimeout);
       document.documentElement.classList.remove('auth-loading');
     }
   }

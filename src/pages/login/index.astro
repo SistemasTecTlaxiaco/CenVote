@@ -4,19 +4,45 @@ import Layout from '../../layouts/Layout.astro';
 
 <Layout title="Iniciar Sesión - CenVote" hideSidebar={true}>
   <!-- Redirigir si ya tiene sesión -->
-  <script is:inline>
-  import('../../services/AuthService').then(({ authService }) => {
-    if (typeof window !== 'undefined') {
-      const user = authService.getUser();
-
-      if (user && authService.isAuthenticated()) {
-        window.location.href = user.role === 'admin'
-          ? '/'
-          : '/dashboard';
+  <script>
+    import { authService } from '../../services/AuthService';
+    
+    async function checkExistingSession() {
+      if (typeof window === 'undefined') return;
+      
+      if (authService.isAuthenticated()) {
+        const token = authService.getToken();
+        const user = authService.getUser();
+        const API_URL = (typeof import.meta !== 'undefined' && typeof import.meta.env !== 'undefined' && import.meta.env.PUBLIC_API_URL) || (window.location.protocol === 'https:' ? 'https://' + window.location.hostname + ':3001' : 'http://' + window.location.hostname + ':3000');
+        
+        try {
+          const res = await fetch(`${API_URL}/api/auth/me`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (res.ok) {
+            const freshUser = await res.json();
+            localStorage.setItem('cenvote_auth_user', JSON.stringify(freshUser));
+            const role = freshUser.role || 'user';
+            window.location.href = role === 'admin' ? '/' : '/dashboard';
+          } else {
+            // Token inválido/expirado en el servidor, limpiar sesión local
+            localStorage.removeItem('cenvote_auth_token');
+            localStorage.removeItem('cenvote_auth_user');
+          }
+        } catch (e) {
+          // Error de red: permitimos la redirección usando los datos locales
+          const role = user?.role || 'user';
+          window.location.href = role === 'admin' ? '/' : '/dashboard';
+        }
       }
     }
-  });
-</script>
+    
+    checkExistingSession();
+  </script>
 
   <div class="min-h-screen flex items-center justify-center py-8 px-4 bg-slate-950 relative overflow-hidden">
     <!-- Fondo difuso -->
